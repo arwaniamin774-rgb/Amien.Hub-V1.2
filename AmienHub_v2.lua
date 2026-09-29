@@ -292,7 +292,8 @@ local ok, err = pcall(function()
     CreateTab("Visual","V",4)
     CreateTab("World","W",5)
     CreateTab("Teleport","T",6)
-    CreateTab("Settings","S",7)
+    CreateTab("Global Chat","C",7)
+    CreateTab("Settings","S",8)
 
     local Content = Instance.new("ScrollingFrame")
     Content.Name = "Content"
@@ -377,26 +378,77 @@ local ok, err = pcall(function()
         return c
     end
 
-    local function GetCash()
-        local keys = {"cash","money","coins","coin","currency","gold","gems","gem","balance","credits"}
-        local function matches(n)
-            n = string.lower(n)
-            for _,k in ipairs(keys) do
-                if n == k or string.find(n,k,1,true) then return true end
-            end
-            return false
+    local function ReadNumericValue(obj)
+        if obj:IsA("IntValue") or obj:IsA("NumberValue") then
+            return tostring(obj.Value)
+        elseif obj:IsA("StringValue") then
+            return tostring(obj.Value)
         end
-        local containers = {Player,Player:FindFirstChild("leaderstats")}
-        for _,container in ipairs(containers) do
+        return nil
+    end
+
+    local function FindStat(names, exactFirst)
+        local wanted = {}
+        for _, name in ipairs(names) do
+            wanted[string.lower(name)] = true
+        end
+
+        -- First check attributes on the Player itself.
+        for name, value in pairs(Player:GetAttributes()) do
+            local lower = string.lower(name)
+            if wanted[lower] and (type(value) == "number" or type(value) == "string") then
+                return tostring(value)
+            end
+        end
+
+        -- Then check common player containers, including leaderstats.
+        local containers = {Player, Player:FindFirstChild("leaderstats")}
+        for _, container in ipairs(containers) do
             if container then
-                for _,obj in ipairs(container:GetDescendants()) do
-                    if (obj:IsA("IntValue") or obj:IsA("NumberValue") or obj:IsA("StringValue")) and matches(obj.Name) then
-                        return tostring(obj.Value)
+                for _, obj in ipairs(container:GetDescendants()) do
+                    local lower = string.lower(obj.Name)
+                    if wanted[lower] then
+                        local value = ReadNumericValue(obj)
+                        if value ~= nil then return value end
                     end
                 end
             end
         end
+
+        -- Finally allow a partial-name match, but only for clearly named stats.
+        for _, container in ipairs(containers) do
+            if container then
+                for _, obj in ipairs(container:GetDescendants()) do
+                    local lower = string.lower(obj.Name)
+                    local isMatch = false
+                    for _, name in ipairs(names) do
+                        local n = string.lower(name)
+                        if string.find(lower, n, 1, true) then
+                            isMatch = true
+                            break
+                        end
+                    end
+                    if isMatch then
+                        local value = ReadNumericValue(obj)
+                        if value ~= nil then return value end
+                    end
+                end
+            end
+        end
+
         return "--"
+    end
+
+    local function GetGameSpeed()
+        -- Steal An Egg may expose a separate Speed stat; prefer that over WalkSpeed.
+        local stat = FindStat({"speed", "movespeed", "walkspeed"}, true)
+        if stat ~= "--" then return stat end
+        local hum = Player.Character and Player.Character:FindFirstChildOfClass("Humanoid")
+        return hum and tostring(hum.WalkSpeed) or "--"
+    end
+
+    local function GetCash()
+        return FindStat({"money", "cash", "coins", "coin", "currency", "gold", "balance", "credits"}, true)
     end
 
     local function MakeRow(parent,y,label,value)
@@ -503,9 +555,163 @@ local ok, err = pcall(function()
         playerValues.username = MakeRow(info,48,"Username",Player.Name)
         playerValues.display = MakeRow(info,86,"Display Name",Player.DisplayName)
         playerValues.userid = MakeRow(info,124,"User ID",tostring(Player.UserId))
-        local hum = Player.Character and Player.Character:FindFirstChildOfClass("Humanoid")
-        playerValues.speed = MakeRow(info,162,"Speed",hum and tostring(hum.WalkSpeed) or "--")
+        playerValues.speed = MakeRow(info,162,"Speed",GetGameSpeed())
         playerValues.money = MakeRow(info,200,"Money / Cash",GetCash())
+    end
+
+    local function RenderGlobalChat()
+        ClearPage()
+        AddLabel("GLOBAL CHAT",0,32,GOLD2).Font = Enum.Font.GothamBlack
+        AddLabel("Chat interface for Amien.Hub users",34,24,GREY)
+
+        local card = Card(72,470,"AMIEN GLOBAL CHAT",nil)
+
+        local status = Instance.new("TextLabel")
+        status.Size = UDim2.new(1,-28,0,24)
+        status.Position = UDim2.fromOffset(14,43)
+        status.BackgroundTransparency = 1
+        status.Text = "UI READY  |  Backend connection not configured"
+        status.TextColor3 = GREY
+        status.TextSize = 11
+        status.Font = Enum.Font.GothamMedium
+        status.TextXAlignment = Enum.TextXAlignment.Left
+        status.ZIndex = 7
+        status.Parent = card
+
+        local chatBox = Instance.new("ScrollingFrame")
+        chatBox.Name = "Messages"
+        chatBox.Size = UDim2.new(1,-28,0,310)
+        chatBox.Position = UDim2.fromOffset(14,72)
+        chatBox.BackgroundColor3 = Color3.fromRGB(8,8,8)
+        chatBox.BorderSizePixel = 0
+        chatBox.ScrollBarThickness = 3
+        chatBox.ScrollBarImageColor3 = GOLD
+        chatBox.CanvasSize = UDim2.new(0,0,0,0)
+        chatBox.AutomaticCanvasSize = Enum.AutomaticSize.Y
+        chatBox.ScrollingDirection = Enum.ScrollingDirection.Y
+        chatBox.ZIndex = 7
+        chatBox.Parent = card
+        local mbc = Instance.new("UICorner")
+        mbc.CornerRadius = UDim.new(0,9)
+        mbc.Parent = chatBox
+        local mp = Instance.new("UIPadding")
+        mp.PaddingTop = UDim.new(0,10)
+        mp.PaddingBottom = UDim.new(0,10)
+        mp.PaddingLeft = UDim.new(0,10)
+        mp.PaddingRight = UDim.new(0,10)
+        mp.Parent = chatBox
+        local ml = Instance.new("UIListLayout")
+        ml.Padding = UDim.new(0,7)
+        ml.SortOrder = Enum.SortOrder.LayoutOrder
+        ml.Parent = chatBox
+
+        local function AddMessage(username,message,isLocal)
+            local row = Instance.new("Frame")
+            row.Size = UDim2.new(1,0,0,48)
+            row.BackgroundColor3 = isLocal and Color3.fromRGB(28,22,9) or Color3.fromRGB(17,17,17)
+            row.BorderSizePixel = 0
+            row.ZIndex = 8
+            row.Parent = chatBox
+            local rc = Instance.new("UICorner")
+            rc.CornerRadius = UDim.new(0,7)
+            rc.Parent = row
+            local user = Instance.new("TextLabel")
+            user.Size = UDim2.new(1,-20,0,18)
+            user.Position = UDim2.fromOffset(10,5)
+            user.BackgroundTransparency = 1
+            user.Text = username
+            user.TextColor3 = isLocal and GOLD2 or WHITE
+            user.TextSize = 12
+            user.Font = Enum.Font.GothamBold
+            user.TextXAlignment = Enum.TextXAlignment.Left
+            user.ZIndex = 9
+            user.Parent = row
+            local msg = Instance.new("TextLabel")
+            msg.Size = UDim2.new(1,-20,0,20)
+            msg.Position = UDim2.fromOffset(10,23)
+            msg.BackgroundTransparency = 1
+            msg.Text = message
+            msg.TextColor3 = GREY
+            msg.TextSize = 12
+            msg.Font = Enum.Font.GothamMedium
+            msg.TextXAlignment = Enum.TextXAlignment.Left
+            msg.TextTruncate = Enum.TextTruncate.AtEnd
+            msg.ZIndex = 9
+            msg.Parent = row
+        end
+
+        AddMessage("Amien.Hub", "Global Chat UI aktif.", false)
+        AddMessage(Player.Name, "Ketik pesan untuk mencoba tampilan chat.", true)
+
+        local input = Instance.new("TextBox")
+        input.Size = UDim2.new(1,-92,0,42)
+        input.Position = UDim2.fromOffset(14,394)
+        input.BackgroundColor3 = Color3.fromRGB(18,18,18)
+        input.BorderSizePixel = 0
+        input.PlaceholderText = "Ketik pesan..."
+        input.PlaceholderColor3 = GREY
+        input.Text = ""
+        input.TextColor3 = WHITE
+        input.TextSize = 13
+        input.Font = Enum.Font.GothamMedium
+        input.ClearTextOnFocus = false
+        input.TextXAlignment = Enum.TextXAlignment.Left
+        input.ZIndex = 8
+        input.Parent = card
+        local ic = Instance.new("UICorner")
+        ic.CornerRadius = UDim.new(0,8)
+        ic.Parent = input
+        local ip = Instance.new("UIPadding")
+        ip.PaddingLeft = UDim.new(0,12)
+        ip.PaddingRight = UDim.new(0,8)
+        ip.Parent = input
+
+        local send = Instance.new("TextButton")
+        send.Size = UDim2.fromOffset(66,42)
+        send.Position = UDim2.new(1,-80,0,394)
+        send.BackgroundColor3 = Color3.fromRGB(48,35,8)
+        send.BorderSizePixel = 0
+        send.Text = "SEND"
+        send.TextColor3 = GOLD2
+        send.TextSize = 12
+        send.Font = Enum.Font.GothamBold
+        send.AutoButtonColor = false
+        send.ZIndex = 8
+        send.Parent = card
+        local sc = Instance.new("UICorner")
+        sc.CornerRadius = UDim.new(0,8)
+        sc.Parent = send
+        local ss = Instance.new("UIStroke")
+        ss.Color = GOLD
+        ss.Thickness = 1
+        ss.Parent = send
+
+        local function sendLocal()
+            local message = input.Text:gsub("%s+$","")
+            if message == "" then return end
+            if #message > 120 then message = string.sub(message,1,120) end
+            AddMessage(Player.Name,message,true)
+            input.Text = ""
+            task.defer(function()
+                chatBox.CanvasPosition = Vector2.new(0, math.max(0, chatBox.AbsoluteCanvasSize.Y))
+            end)
+        end
+        send.MouseButton1Click:Connect(sendLocal)
+        input.FocusLost:Connect(function(enterPressed)
+            if enterPressed then sendLocal() end
+        end)
+
+        local note = Instance.new("TextLabel")
+        note.Size = UDim2.new(1,-28,0,25)
+        note.Position = UDim2.fromOffset(14,445)
+        note.BackgroundTransparency = 1
+        note.Text = "Catatan: tampilan ini belum mengirim pesan ke pengguna lain."
+        note.TextColor3 = Color3.fromRGB(125,125,125)
+        note.TextSize = 10
+        note.Font = Enum.Font.GothamMedium
+        note.TextXAlignment = Enum.TextXAlignment.Left
+        note.ZIndex = 8
+        note.Parent = card
     end
 
     local function RenderGeneric(title,desc,items)
@@ -531,6 +737,8 @@ local ok, err = pcall(function()
             RenderGeneric("VISUAL","Visual options - presentation only",{{"ESP Player","Placeholder"},{"ESP Item","Placeholder"},{"ESP Chest","Placeholder"},{"Fullbright","Placeholder"},{"No Fog","Placeholder"}})
         elseif name == "World" then
             RenderGeneric("WORLD","World options - presentation only",{{"Remove Grass","Placeholder"},{"Remove Tree","Placeholder"},{"Remove Rock","Placeholder"},{"Low Texture","Placeholder"},{"No Water","Placeholder"}})
+        elseif name == "Global Chat" then
+            RenderGlobalChat()
         elseif name == "Teleport" then
             RenderGeneric("TELEPORT","Location buttons - placeholders only",{{"Spawn","Placeholder"},{"Shop","Placeholder"},{"Island 1","Placeholder"},{"Island 2","Placeholder"},{"Boss","Placeholder"},{"Event","Placeholder"},{"Desert","Placeholder"},{"Snow","Placeholder"},{"Ocean","Placeholder"}})
         else
@@ -653,8 +861,7 @@ local ok, err = pcall(function()
     task.spawn(function()
         while Gui.Parent do
             if currentPage == "Player" then
-                local hum = Player.Character and Player.Character:FindFirstChildOfClass("Humanoid")
-                if playerValues.speed then playerValues.speed.Text = hum and tostring(hum.WalkSpeed) or "--" end
+                if playerValues.speed then playerValues.speed.Text = GetGameSpeed() end
                 if playerValues.money then playerValues.money.Text = GetCash() end
             end
             task.wait(1)
