@@ -103,7 +103,7 @@ New("UIGradient", {
     })
 }, Header)
 
-local HeaderCrown = Label(Header, "♛", UDim2.fromOffset(48, 50), UDim2.fromOffset(12, 8), 34, GOLD2, Enum.Font.GothamBlack)
+local HeaderCrown = Label(Header, "A", UDim2.fromOffset(48, 50), UDim2.fromOffset(12, 8), 34, GOLD2, Enum.Font.GothamBlack)
 HeaderCrown.TextXAlignment = Enum.TextXAlignment.Center
 local HeaderA = Label(Header, "A", UDim2.fromOffset(36, 42), UDim2.fromOffset(51, 15), 28, GOLD2, Enum.Font.GothamBlack)
 HeaderA.TextXAlignment = Enum.TextXAlignment.Center
@@ -114,7 +114,7 @@ local Minimize = New("TextButton", {
     Size = UDim2.fromOffset(38, 32),
     Position = UDim2.new(1, -86, 0, 21),
     BackgroundColor3 = PANEL2,
-    Text = "—",
+    Text = "-",
     TextColor3 = GOLD2,
     TextSize = 21,
     Font = Enum.Font.GothamBold,
@@ -128,7 +128,7 @@ local Close = New("TextButton", {
     Size = UDim2.fromOffset(38, 32),
     Position = UDim2.new(1, -43, 0, 21),
     BackgroundColor3 = PANEL2,
-    Text = "×",
+    Text = "X",
     TextColor3 = GOLD2,
     TextSize = 24,
     Font = Enum.Font.GothamBold,
@@ -177,13 +177,13 @@ local tabs = {}
 local activePage = nil
 
 local tabDefinitions = {
-    {"Home", "⌂"},
-    {"Main", "⚙"},
-    {"Player", "♙"},
-    {"Visual", "◉"},
-    {"World", "◎"},
-    {"Teleport", "⌖"},
-    {"Settings", "⚙"}
+    {"Home", "H"},
+    {"Main", "M"},
+    {"Player", "P"},
+    {"Visual", "V"},
+    {"World", "W"},
+    {"Teleport", "T"},
+    {"Settings", "S"}
 }
 
 local function CreateTab(name, icon, order)
@@ -282,7 +282,7 @@ local function ToggleRow(parent, text, icon, order)
     }, parent)
     Corner(row, 9)
     Stroke(row, Color3.fromRGB(42,42,42), 1, 0.15)
-    local ico = Label(row, icon or "•", UDim2.fromOffset(36,46), UDim2.fromOffset(5,0), 19, GOLD2, Enum.Font.GothamBold)
+    local ico = Label(row, icon or "-", UDim2.fromOffset(36,46), UDim2.fromOffset(5,0), 19, GOLD2, Enum.Font.GothamBold)
     ico.TextXAlignment = Enum.TextXAlignment.Center
     Label(row, text, UDim2.new(1,-105,1,0), UDim2.fromOffset(47,0), 13, WHITE, Enum.Font.GothamMedium)
     local track = New("Frame", {
@@ -320,15 +320,15 @@ end
 -- HOME PAGE
 --==================================================
 local Home = CreatePage("Home")
-PageTitle(Home, "Home", "Simple • Clean • Powerful")
+PageTitle(Home, "Home", "Simple - Clean - Powerful")
 local Hero = New("Frame", {
-    Size = UDim2.new(1,-4,0,235),
+    Size = UDim2.new(1,-4,0,280),
     BackgroundColor3 = Color3.fromRGB(7,7,7),
     BorderSizePixel = 0
 }, Home)
 Corner(Hero, 15)
 Stroke(Hero, GOLD, 1, 0.15)
-Label(Hero, "♛", UDim2.new(1,0,0,65), UDim2.fromOffset(0,25), 54, GOLD2, Enum.Font.GothamBlack).TextXAlignment = Enum.TextXAlignment.Center
+Label(Hero, "A", UDim2.new(1,0,0,65), UDim2.fromOffset(0,25), 54, GOLD2, Enum.Font.GothamBlack).TextXAlignment = Enum.TextXAlignment.Center
 local heroA = Label(Hero, "A M I E N", UDim2.new(1,0,0,65), UDim2.fromOffset(0,78), 43, GOLD2, Enum.Font.GothamBlack)
 heroA.TextXAlignment = Enum.TextXAlignment.Center
 local welcome = New("Frame", {
@@ -341,7 +341,7 @@ Corner(welcome, 28)
 Stroke(welcome, GOLD, 1, 0.05)
 local wl = Label(welcome, "Welcome to Amien.Hub V2", UDim2.new(1,0,0,26), UDim2.fromOffset(0,4), 15, WHITE, Enum.Font.GothamBold)
 wl.TextXAlignment = Enum.TextXAlignment.Center
-local ws = Label(welcome, "Simple • Clean • Powerful", UDim2.new(1,0,0,20), UDim2.fromOffset(0,30), 11, GREY, Enum.Font.GothamMedium)
+local ws = Label(welcome, "Simple - Clean - Powerful", UDim2.new(1,0,0,20), UDim2.fromOffset(0,30), 11, GREY, Enum.Font.GothamMedium)
 ws.TextXAlignment = Enum.TextXAlignment.Center
 
 local HomeInfo = Card(Home, "Information", 105)
@@ -349,7 +349,7 @@ Label(HomeInfo, "Amien.Hub V2", UDim2.new(1,-28,0,24), UDim2.fromOffset(14,40), 
 Label(HomeInfo, "Responsive black & gold interface with scrollable pages.", UDim2.new(1,-28,0,24), UDim2.fromOffset(14,66), 12, WHITE, Enum.Font.GothamMedium)
 
 local HomeStatus = Card(Home, "Status", 105)
-Label(HomeStatus, "● Ready", UDim2.new(1,-28,0,24), UDim2.fromOffset(14,40), 14, GREEN, Enum.Font.GothamBold)
+Label(HomeStatus, "READY", UDim2.new(1,-28,0,24), UDim2.fromOffset(14,40), 14, GREEN, Enum.Font.GothamBold)
 Label(HomeStatus, "UI loaded for " .. Player.DisplayName, UDim2.new(1,-28,0,24), UDim2.fromOffset(14,66), 12, WHITE, Enum.Font.GothamMedium)
 
 --==================================================
@@ -361,11 +361,11 @@ local MainCard = Card(MainPage, "Main Features", 300)
 local MainStack = Stack(MainCard, 7)
 MainStack.Parent = MainCard
 local mainItems = {
-    {"Auto Farm", "⚔"},
-    {"Auto Collect", "♜"},
-    {"Auto Quest", "▣"},
-    {"Auto Upgrade", "↗"},
-    {"Auto Rebirth", "⟳"}
+    {"Auto Farm", "AF"},
+    {"Auto Collect", "AC"},
+    {"Auto Quest", "AQ"},
+    {"Auto Upgrade", "AU"},
+    {"Auto Rebirth", "AR"}
 }
 for i, item in ipairs(mainItems) do ToggleRow(MainCard, item[1], item[2], i) end
 
@@ -412,25 +412,31 @@ local infoLayout = Stack(InfoList, 6)
 
 local function InfoRow(labelText, icon)
     local row = New("Frame", {
-        Size = UDim2.new(1,0,0,36),
+        Size = UDim2.new(1,0,0,38),
         BackgroundColor3 = ROW,
         BorderSizePixel = 0
     }, InfoList)
     Corner(row, 9)
     Stroke(row, Color3.fromRGB(42,42,42), 1, 0.18)
-    local i = Label(row, icon or "•", UDim2.fromOffset(34,36), UDim2.fromOffset(5,0), 17, GOLD2, Enum.Font.GothamBold)
+
+    local i = Label(row, icon or "-", UDim2.fromOffset(34,38), UDim2.fromOffset(5,0), 15, GOLD2, Enum.Font.GothamBold)
     i.TextXAlignment = Enum.TextXAlignment.Center
-    local l = Label(row, labelText, UDim2.new(0.48,0,1,0), UDim2.fromOffset(42,0), 12, WHITE, Enum.Font.GothamMedium)
-    local v = Label(row, "--", UDim2.new(0.48,-8,1,0), UDim2.new(0.52,0,0,0), 12, WHITE, Enum.Font.GothamBold)
-    v.TextXAlignment = Enum.TextXAlignment.Right
+
+    local l = Label(row, labelText, UDim2.fromOffset(105,38), UDim2.fromOffset(45,0), 12, GREY, Enum.Font.GothamMedium)
+    l.TextXAlignment = Enum.TextXAlignment.Left
+    l.TextTruncate = Enum.TextTruncate.AtEnd
+
+    local v = Label(row, "--", UDim2.new(1,-162,1,0), UDim2.fromOffset(155,0), 12, WHITE, Enum.Font.GothamBold)
+    v.TextXAlignment = Enum.TextXAlignment.Left
+    v.TextTruncate = Enum.TextTruncate.AtEnd
     return v
 end
 
-local usernameValue = InfoRow("Username", "●")
-local displayValue = InfoRow("Display Name", "◆")
-local userIdValue = InfoRow("User ID", "▣")
-local speedValue = InfoRow("Speed", "↯")
-local moneyValue = InfoRow("Money / Cash", "◈")
+local usernameValue = InfoRow("Username", "U")
+local displayValue = InfoRow("Display Name", "D")
+local userIdValue = InfoRow("User ID", "ID")
+local speedValue = InfoRow("Speed", "SP")
+local moneyValue = InfoRow("Money / Cash", "$")
 
 local function GetHumanoid()
     local character = Player.Character
@@ -503,11 +509,11 @@ PageTitle(VisualPage, "Visual", "Visual Features")
 local VisualCard = Card(VisualPage, "Visual Features", 300)
 Stack(VisualCard, 7)
 local visualItems = {
-    {"ESP Player", "◉"},
-    {"ESP Item", "◆"},
-    {"ESP Chest", "▣"},
-    {"Fullbright", "☀"},
-    {"No Fog", "☁"}
+    {"ESP Player", "EP"},
+    {"ESP Item", "EI"},
+    {"ESP Chest", "EC"},
+    {"Fullbright", "FB"},
+    {"No Fog", "NF"}
 }
 for i, item in ipairs(visualItems) do ToggleRow(VisualCard, item[1], item[2], i) end
 
@@ -519,11 +525,11 @@ PageTitle(WorldPage, "World", "World Features")
 local WorldCard = Card(WorldPage, "World Features", 300)
 Stack(WorldCard, 7)
 local worldItems = {
-    {"Remove Grass", "❧"},
-    {"Remove Tree", "♟"},
-    {"Remove Rock", "◈"},
-    {"Low Texture", "≋"},
-    {"No Water", "♦"}
+    {"Remove Grass", "RG"},
+    {"Remove Tree", "RT"},
+    {"Remove Rock", "RR"},
+    {"Low Texture", "LT"},
+    {"No Water", "NW"}
 }
 for i, item in ipairs(worldItems) do ToggleRow(WorldCard, item[1], item[2], i) end
 
@@ -536,7 +542,7 @@ local Search = New("TextBox", {
     Size = UDim2.new(1,-4,0,42),
     BackgroundColor3 = ROW,
     BorderSizePixel = 0,
-    PlaceholderText = "⌕  Search location...",
+    PlaceholderText = "Search location...",
     PlaceholderColor3 = GREY,
     Text = "",
     TextColor3 = WHITE,
@@ -569,9 +575,9 @@ New("UIPadding", {
 }, TeleportCard)
 
 local locations = {
-    {"Spawn", "⌂"}, {"Shop", "▰"}, {"Island 1", "♨"},
-    {"Island 2", "▲"}, {"Boss", "☠"}, {"Event", "★"},
-    {"Desert", "♜"}, {"Snow", "❄"}, {"Ocean", "◒"}
+    {"Spawn", "SP"}, {"Shop", "SH"}, {"Island 1", "I1"},
+    {"Island 2", "I2"}, {"Boss", "BO"}, {"Event", "EV"},
+    {"Desert", "DE"}, {"Snow", "SN"}, {"Ocean", "OC"}
 }
 local locationButtons = {}
 for i, item in ipairs(locations) do
@@ -641,9 +647,9 @@ local function ActionRow(parent, title, icon, actionText, order)
     return button
 end
 
-ActionRow(SettingsCard, "Save Config", "⚙", "Save", 1)
-ActionRow(SettingsCard, "Load Config", "▣", "Load", 2)
-ActionRow(SettingsCard, "Reset Config", "⟳", "Reset", 3)
+ActionRow(SettingsCard, "Save Config", "SV", "Save", 1)
+ActionRow(SettingsCard, "Load Config", "LD", "Load", 2)
+ActionRow(SettingsCard, "Reset Config", "RS", "Reset", 3)
 
 local KeyRow = New("Frame", {
     Size = UDim2.new(1,-24,0,45),
@@ -653,7 +659,7 @@ local KeyRow = New("Frame", {
 }, SettingsCard)
 Corner(KeyRow, 9)
 Stroke(KeyRow, Color3.fromRGB(42,42,42), 1, 0.15)
-Label(KeyRow, "⌨", UDim2.fromOffset(34,45), UDim2.fromOffset(5,0), 18, GOLD2, Enum.Font.GothamBold).TextXAlignment = Enum.TextXAlignment.Center
+Label(KeyRow, "KEY", UDim2.fromOffset(34,45), UDim2.fromOffset(5,0), 18, GOLD2, Enum.Font.GothamBold).TextXAlignment = Enum.TextXAlignment.Center
 Label(KeyRow, "UI Toggle Key", UDim2.new(1,-150,1,0), UDim2.fromOffset(44,0), 13, WHITE, Enum.Font.GothamMedium)
 local KeyValue = New("TextLabel", {
     Size = UDim2.fromOffset(105,33),
@@ -705,8 +711,8 @@ end)
 --==================================================
 local Floating = New("TextButton", {
     Name = "FloatingLogo",
-    Size = UDim2.fromOffset(72,72),
-    Position = UDim2.new(0.5,-36,0.5,-36),
+    Size = UDim2.fromOffset(58,58),
+    Position = UDim2.new(0.5,-29,0.5,-29),
     AnchorPoint = Vector2.new(0.5,0.5),
     BackgroundColor3 = Color3.fromRGB(7,7,7),
     BorderSizePixel = 0,
@@ -715,13 +721,13 @@ local Floating = New("TextButton", {
     Visible = false,
     ZIndex = 100
 }, Gui)
-Corner(Floating, 20)
+Corner(Floating, 29)
 Stroke(Floating, GOLD, 2, 0.05)
 
-local FloatCrown = Label(Floating, "♛", UDim2.new(1,0,0,29), UDim2.fromOffset(0,2), 20, GOLD2, Enum.Font.GothamBlack)
+local FloatCrown = Label(Floating, "^", UDim2.new(1,0,0,22), UDim2.fromOffset(0,1), 15, GOLD2, Enum.Font.GothamBlack)
 FloatCrown.TextXAlignment = Enum.TextXAlignment.Center
 FloatCrown.ZIndex = 101
-local FloatA = Label(Floating, "A", UDim2.new(1,0,0,42), UDim2.fromOffset(0,24), 34, GOLD2, Enum.Font.GothamBlack)
+local FloatA = Label(Floating, "A", UDim2.new(1,0,0,42), UDim2.fromOffset(0,20), 28, GOLD2, Enum.Font.GothamBlack)
 FloatA.TextXAlignment = Enum.TextXAlignment.Center
 FloatA.ZIndex = 101
 
@@ -760,7 +766,7 @@ local function MinimizeUI()
     savedSize = Main.Size
     savedPosition = Main.Position
     Main.Visible = false
-    Floating.Position = UDim2.new(savedPosition.X.Scale, savedPosition.X.Offset, savedPosition.Y.Scale, savedPosition.Y.Offset)
+    -- Keep the floating logo exactly where the user last dragged it.
     Floating.Visible = true
 end
 
