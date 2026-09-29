@@ -90,6 +90,57 @@ Corner(Main, 16)
 Stroke(Main, GOLD, 2, 0.08)
 New("UIAspectRatioConstraint", {AspectRatio = 1.55}, Main)
 
+-- PREMIUM SHARED BACKGROUND
+New("UIGradient", {
+    Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(3,3,3)),
+        ColorSequenceKeypoint.new(0.48, Color3.fromRGB(11,8,3)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(2,2,2))
+    }),
+    Rotation = 35
+}, Main)
+
+local BackgroundLayer = New("Frame", {
+    Size = UDim2.fromScale(1,1),
+    BackgroundTransparency = 1,
+    BorderSizePixel = 0,
+    ZIndex = 0
+}, Main)
+
+local function GlowOrb(size, position, transparency)
+    local orb = New("Frame", {
+        Size = size, Position = position,
+        BackgroundColor3 = GOLD, BackgroundTransparency = transparency,
+        BorderSizePixel = 0, ZIndex = 0
+    }, BackgroundLayer)
+    Corner(orb, 999)
+    Stroke(orb, GOLD2, 1, 0.72)
+end
+
+GlowOrb(UDim2.fromOffset(420,420), UDim2.new(0.74,-210,0.40,-210), 0.965)
+GlowOrb(UDim2.fromOffset(250,250), UDim2.new(0.12,-125,0.75,-125), 0.973)
+GlowOrb(UDim2.fromOffset(170,170), UDim2.new(0.90,-85,0.80,-85), 0.955)
+
+local Ring = New("Frame", {
+    Size = UDim2.fromOffset(500,500),
+    Position = UDim2.new(0.74,-250,0.45,-250),
+    BackgroundTransparency = 1, BorderSizePixel = 0, ZIndex = 0
+}, BackgroundLayer)
+Corner(Ring, 999)
+Stroke(Ring, GOLD, 2, 0.86)
+
+for _, spec in ipairs({
+    {UDim2.new(1.35,0,0,2), UDim2.new(-0.12,0,0.20,0), -18, 0.82},
+    {UDim2.new(1.35,0,0,2), UDim2.new(-0.08,0,0.78,0), 16, 0.88},
+    {UDim2.new(0.90,0,0,2), UDim2.new(0.42,0,0.91,0), -10, 0.90}
+} do
+    New("Frame", {
+        Size = spec[1], Position = spec[2], Rotation = spec[3],
+        BackgroundColor3 = GOLD, BackgroundTransparency = spec[4],
+        BorderSizePixel = 0, ZIndex = 0
+    }, BackgroundLayer)
+end
+
 local Header = New("Frame", {
     Size = UDim2.new(1, 0, 0, 74),
     BackgroundColor3 = Color3.fromRGB(3, 3, 3),
@@ -376,7 +427,7 @@ local PlayerPage = CreatePage("Player")
 PageTitle(PlayerPage, "Player", "Your Roblox profile & live player information")
 
 local ProfileCard = New("Frame", {
-    Size = UDim2.new(1,-4,0,235),
+    Size = UDim2.new(1,-4,0,252),
     BackgroundColor3 = PANEL,
     BorderSizePixel = 0
 }, PlayerPage)
@@ -384,7 +435,7 @@ Corner(ProfileCard, 14)
 Stroke(ProfileCard, Color3.fromRGB(55,55,55), 1, 0)
 
 local AvatarBox = New("Frame", {
-    Size = UDim2.new(0,205,1,-24),
+    Size = UDim2.new(0,174,1,-24),
     Position = UDim2.fromOffset(12,12),
     BackgroundColor3 = Color3.fromRGB(24,24,24),
     BorderSizePixel = 0
@@ -401,32 +452,49 @@ local Avatar = New("ImageLabel", {
     ScaleType = Enum.ScaleType.Fit
 }, AvatarBox)
 
+local AvatarBorder = New("Frame", {
+    Size = UDim2.new(1,-8,1,-8), Position = UDim2.fromOffset(4,4),
+    BackgroundTransparency = 1, BorderSizePixel = 0, ZIndex = 2
+}, AvatarBox)
+Corner(AvatarBorder, 12)
+Stroke(AvatarBorder, GOLD2, 1, 0.72)
+
+local AvatarTag = Label(AvatarBox, "PLAYER", UDim2.new(1,-16,0,18), UDim2.fromOffset(8,7), 8, GOLD2, Enum.Font.GothamBold)
+AvatarTag.TextXAlignment = Enum.TextXAlignment.Center
+AvatarTag.ZIndex = 3
+
 local AvatarName = Label(ProfileCard, "Your Information", UDim2.new(1,-235,0,30), UDim2.fromOffset(230,12), 17, WHITE, Enum.Font.GothamBold)
 
 local InfoList = New("Frame", {
-    Size = UDim2.new(1,-235,1,-54),
-    Position = UDim2.fromOffset(230,47),
+    Size = UDim2.new(1,-205,1,-54),
+    Position = UDim2.fromOffset(205,47),
     BackgroundTransparency = 1
 }, ProfileCard)
 local infoLayout = Stack(InfoList, 6)
 
 local function InfoRow(labelText, icon)
     local row = New("Frame", {
-        Size = UDim2.new(1,0,0,38),
+        Size = UDim2.new(1,0,0,34),
         BackgroundColor3 = ROW,
         BorderSizePixel = 0
     }, InfoList)
-    Corner(row, 9)
-    Stroke(row, Color3.fromRGB(42,42,42), 1, 0.18)
+    Corner(row, 8)
+    Stroke(row, Color3.fromRGB(48,48,48), 1, 0.12)
 
-    local i = Label(row, icon or "-", UDim2.fromOffset(34,38), UDim2.fromOffset(5,0), 15, GOLD2, Enum.Font.GothamBold)
+    local i = Label(row, icon or "-", UDim2.fromOffset(30,34), UDim2.fromOffset(5,0), 12, GOLD2, Enum.Font.GothamBold)
     i.TextXAlignment = Enum.TextXAlignment.Center
 
-    local l = Label(row, labelText, UDim2.fromOffset(105,38), UDim2.fromOffset(45,0), 12, GREY, Enum.Font.GothamMedium)
+    local l = Label(row, labelText, UDim2.fromOffset(92,34), UDim2.fromOffset(38,0), 11, GREY, Enum.Font.GothamMedium)
     l.TextXAlignment = Enum.TextXAlignment.Left
     l.TextTruncate = Enum.TextTruncate.AtEnd
 
-    local v = Label(row, "--", UDim2.new(1,-162,1,0), UDim2.fromOffset(155,0), 12, WHITE, Enum.Font.GothamBold)
+    New("Frame", {
+        Size = UDim2.new(0,1,0,18), Position = UDim2.fromOffset(132,8),
+        BackgroundColor3 = Color3.fromRGB(65,65,65), BackgroundTransparency = 0.35,
+        BorderSizePixel = 0
+    }, row)
+
+    local v = Label(row, "--", UDim2.new(1,-150,1,0), UDim2.fromOffset(143,0), 11, WHITE, Enum.Font.GothamBold)
     v.TextXAlignment = Enum.TextXAlignment.Left
     v.TextTruncate = Enum.TextTruncate.AtEnd
     return v
@@ -711,8 +779,8 @@ end)
 --==================================================
 local Floating = New("TextButton", {
     Name = "FloatingLogo",
-    Size = UDim2.fromOffset(58,58),
-    Position = UDim2.new(0.5,-29,0.5,-29),
+    Size = UDim2.fromOffset(54,54),
+    Position = UDim2.new(0.5,-27,0.5,-27),
     AnchorPoint = Vector2.new(0.5,0.5),
     BackgroundColor3 = Color3.fromRGB(7,7,7),
     BorderSizePixel = 0,
@@ -721,13 +789,13 @@ local Floating = New("TextButton", {
     Visible = false,
     ZIndex = 100
 }, Gui)
-Corner(Floating, 29)
+Corner(Floating, 27)
 Stroke(Floating, GOLD, 2, 0.05)
 
-local FloatCrown = Label(Floating, "^", UDim2.new(1,0,0,22), UDim2.fromOffset(0,1), 15, GOLD2, Enum.Font.GothamBlack)
+local FloatCrown = Label(Floating, "^", UDim2.new(1,0,0,19), UDim2.fromOffset(0,1), 13, GOLD2, Enum.Font.GothamBlack)
 FloatCrown.TextXAlignment = Enum.TextXAlignment.Center
 FloatCrown.ZIndex = 101
-local FloatA = Label(Floating, "A", UDim2.new(1,0,0,42), UDim2.fromOffset(0,20), 28, GOLD2, Enum.Font.GothamBlack)
+local FloatA = Label(Floating, "A", UDim2.new(1,0,0,34), UDim2.fromOffset(0,18), 24, GOLD2, Enum.Font.GothamBlack)
 FloatA.TextXAlignment = Enum.TextXAlignment.Center
 FloatA.ZIndex = 101
 
