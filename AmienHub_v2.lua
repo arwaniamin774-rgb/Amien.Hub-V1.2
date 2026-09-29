@@ -1,871 +1,669 @@
 --// Amien.Hub V2
---// UI ONLY - Black & Gold responsive design
---// Player information is dynamic for the user running the UI.
+--// UI ONLY - Black & Gold
 --// No game/exploit features included.
 
-local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
+local ok, err = pcall(function()
+    local Players = game:GetService("Players")
+    local UserInputService = game:GetService("UserInputService")
+    local Player = Players.LocalPlayer
+    if not Player then return end
+    local PlayerGui = Player:WaitForChild("PlayerGui", 10)
+    if not PlayerGui then return end
 
-local Player = Players.LocalPlayer
-local PlayerGui = Player:WaitForChild("PlayerGui")
+    local old = PlayerGui:FindFirstChild("Amien.Hub")
+    if old then old:Destroy() end
 
-local old = PlayerGui:FindFirstChild("Amien.Hub")
-if old then old:Destroy() end
+    local GOLD = Color3.fromRGB(235,180,55)
+    local GOLD2 = Color3.fromRGB(255,210,90)
+    local DARK = Color3.fromRGB(5,5,5)
+    local PANEL = Color3.fromRGB(13,13,13)
+    local PANEL2 = Color3.fromRGB(20,20,20)
+    local WHITE = Color3.fromRGB(242,242,242)
+    local GREY = Color3.fromRGB(150,150,150)
+    local GREEN = Color3.fromRGB(70,220,95)
 
---==================================================
--- COLORS
---==================================================
-local GOLD = Color3.fromRGB(235, 180, 55)
-local GOLD2 = Color3.fromRGB(255, 210, 90)
-local DARK = Color3.fromRGB(5, 5, 5)
-local PANEL = Color3.fromRGB(13, 13, 13)
-local PANEL2 = Color3.fromRGB(20, 20, 20)
-local ROW = Color3.fromRGB(18, 18, 18)
-local WHITE = Color3.fromRGB(242, 242, 242)
-local GREY = Color3.fromRGB(155, 155, 155)
-local GREEN = Color3.fromRGB(65, 220, 90)
+    local Gui = Instance.new("ScreenGui")
+    Gui.Name = "Amien.Hub"
+    Gui.ResetOnSpawn = false
+    Gui.IgnoreGuiInset = true
+    Gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    Gui.DisplayOrder = 999999
+    Gui.Parent = PlayerGui
 
---==================================================
--- HELPERS
---==================================================
-local function New(className, props, parent)
-    local obj = Instance.new(className)
-    for k, v in pairs(props or {}) do
-        obj[k] = v
-    end
-    obj.Parent = parent
-    return obj
-end
+    local Main = Instance.new("Frame")
+    Main.Name = "Main"
+    Main.Size = UDim2.fromScale(0.86,0.70)
+    Main.Position = UDim2.fromScale(0.5,0.5)
+    Main.AnchorPoint = Vector2.new(0.5,0.5)
+    Main.BackgroundColor3 = DARK
+    Main.BorderSizePixel = 0
+    Main.ClipsDescendants = true
+    Main.Parent = Gui
 
-local function Corner(obj, radius)
-    return New("UICorner", {CornerRadius = UDim.new(0, radius or 10)}, obj)
-end
+    local MainCorner = Instance.new("UICorner")
+    MainCorner.CornerRadius = UDim.new(0,16)
+    MainCorner.Parent = Main
 
-local function Stroke(obj, color, thickness, transparency)
-    return New("UIStroke", {
-        Color = color or GOLD,
-        Thickness = thickness or 1,
-        Transparency = transparency or 0
-    }, obj)
-end
+    local MainStroke = Instance.new("UIStroke")
+    MainStroke.Color = GOLD
+    MainStroke.Thickness = 2
+    MainStroke.Transparency = 0.12
+    MainStroke.Parent = Main
 
-local function Label(parent, text, size, position, textSize, color, font)
-    return New("TextLabel", {
-        Size = size,
-        Position = position or UDim2.new(),
-        BackgroundTransparency = 1,
-        Text = text,
-        TextColor3 = color or WHITE,
-        TextSize = textSize or 14,
-        Font = font or Enum.Font.GothamMedium,
-        TextXAlignment = Enum.TextXAlignment.Left,
-        TextYAlignment = Enum.TextYAlignment.Center
-    }, parent)
-end
+    -- Background FX: Roblox UI primitives only, so no external asset is needed.
+    local BG = Instance.new("Frame")
+    BG.Size = UDim2.fromScale(1,1)
+    BG.BackgroundColor3 = Color3.fromRGB(4,4,4)
+    BG.BorderSizePixel = 0
+    BG.ZIndex = 0
+    BG.Parent = Main
 
---==================================================
--- GUI ROOT
---==================================================
-local Gui = New("ScreenGui", {
-    Name = "Amien.Hub",
-    ResetOnSpawn = false,
-    IgnoreGuiInset = true,
-    ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
-    DisplayOrder = 999
-}, PlayerGui)
-
---==================================================
--- MAIN WINDOW
---==================================================
-local Main = New("Frame", {
-    Name = "Main",
-    Size = UDim2.fromScale(0.88, 0.72),
-    Position = UDim2.fromScale(0.5, 0.5),
-    AnchorPoint = Vector2.new(0.5, 0.5),
-    BackgroundColor3 = DARK,
-    BorderSizePixel = 0,
-    ClipsDescendants = true
-}, Gui)
-Corner(Main, 16)
-Stroke(Main, GOLD, 2, 0.08)
-New("UIAspectRatioConstraint", {AspectRatio = 1.55}, Main)
-
--- PREMIUM SHARED BACKGROUND
-New("UIGradient", {
-    Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(3,3,3)),
-        ColorSequenceKeypoint.new(0.48, Color3.fromRGB(11,8,3)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(2,2,2))
-    }),
-    Rotation = 35
-}, Main)
-
-local BackgroundLayer = New("Frame", {
-    Size = UDim2.fromScale(1,1),
-    BackgroundTransparency = 1,
-    BorderSizePixel = 0,
-    ZIndex = 0
-}, Main)
-
-local function GlowOrb(size, position, transparency)
-    local orb = New("Frame", {
-        Size = size, Position = position,
-        BackgroundColor3 = GOLD, BackgroundTransparency = transparency,
-        BorderSizePixel = 0, ZIndex = 0
-    }, BackgroundLayer)
-    Corner(orb, 999)
-    Stroke(orb, GOLD2, 1, 0.72)
-end
-
-GlowOrb(UDim2.fromOffset(420,420), UDim2.new(0.74,-210,0.40,-210), 0.965)
-GlowOrb(UDim2.fromOffset(250,250), UDim2.new(0.12,-125,0.75,-125), 0.973)
-GlowOrb(UDim2.fromOffset(170,170), UDim2.new(0.90,-85,0.80,-85), 0.955)
-
-local Ring = New("Frame", {
-    Size = UDim2.fromOffset(500,500),
-    Position = UDim2.new(0.74,-250,0.45,-250),
-    BackgroundTransparency = 1, BorderSizePixel = 0, ZIndex = 0
-}, BackgroundLayer)
-Corner(Ring, 999)
-Stroke(Ring, GOLD, 2, 0.86)
-
-for _, spec in ipairs({
-    {UDim2.new(1.35,0,0,2), UDim2.new(-0.12,0,0.20,0), -18, 0.82},
-    {UDim2.new(1.35,0,0,2), UDim2.new(-0.08,0,0.78,0), 16, 0.88},
-    {UDim2.new(0.90,0,0,2), UDim2.new(0.42,0,0.91,0), -10, 0.90}
-} do
-    New("Frame", {
-        Size = spec[1], Position = spec[2], Rotation = spec[3],
-        BackgroundColor3 = GOLD, BackgroundTransparency = spec[4],
-        BorderSizePixel = 0, ZIndex = 0
-    }, BackgroundLayer)
-end
-
-local Header = New("Frame", {
-    Size = UDim2.new(1, 0, 0, 74),
-    BackgroundColor3 = Color3.fromRGB(3, 3, 3),
-    BorderSizePixel = 0
-}, Main)
-New("UIGradient", {
-    Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(10,10,10)),
-        ColorSequenceKeypoint.new(0.55, Color3.fromRGB(2,2,2)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(13,10,3))
-    })
-}, Header)
-
-local HeaderCrown = Label(Header, "A", UDim2.fromOffset(48, 50), UDim2.fromOffset(12, 8), 34, GOLD2, Enum.Font.GothamBlack)
-HeaderCrown.TextXAlignment = Enum.TextXAlignment.Center
-local HeaderA = Label(Header, "A", UDim2.fromOffset(36, 42), UDim2.fromOffset(51, 15), 28, GOLD2, Enum.Font.GothamBlack)
-HeaderA.TextXAlignment = Enum.TextXAlignment.Center
-local HeaderName = Label(Header, "AMIEN.HUB V2", UDim2.fromOffset(220, 32), UDim2.fromOffset(91, 11), 20, GOLD2, Enum.Font.GothamBlack)
-local HeaderSub = Label(Header, "P R E M I U M   S C R I P T   H U B", UDim2.fromOffset(300, 18), UDim2.fromOffset(92, 40), 9, GREY, Enum.Font.GothamMedium)
-
-local Minimize = New("TextButton", {
-    Size = UDim2.fromOffset(38, 32),
-    Position = UDim2.new(1, -86, 0, 21),
-    BackgroundColor3 = PANEL2,
-    Text = "-",
-    TextColor3 = GOLD2,
-    TextSize = 21,
-    Font = Enum.Font.GothamBold,
-    BorderSizePixel = 0,
-    AutoButtonColor = false
-}, Header)
-Corner(Minimize, 8)
-Stroke(Minimize, Color3.fromRGB(60,60,60), 1, 0.2)
-
-local Close = New("TextButton", {
-    Size = UDim2.fromOffset(38, 32),
-    Position = UDim2.new(1, -43, 0, 21),
-    BackgroundColor3 = PANEL2,
-    Text = "X",
-    TextColor3 = GOLD2,
-    TextSize = 24,
-    Font = Enum.Font.GothamBold,
-    BorderSizePixel = 0,
-    AutoButtonColor = false
-}, Header)
-Corner(Close, 8)
-Stroke(Close, Color3.fromRGB(60,60,60), 1, 0.2)
-
-local Body = New("Frame", {
-    Size = UDim2.new(1, 0, 1, -74),
-    Position = UDim2.fromOffset(0, 74),
-    BackgroundTransparency = 1
-}, Main)
-
---==================================================
--- SIDEBAR
---==================================================
-local Sidebar = New("Frame", {
-    Size = UDim2.new(0, 180, 1, -18),
-    Position = UDim2.fromOffset(10, 9),
-    BackgroundColor3 = Color3.fromRGB(7,7,7),
-    BorderSizePixel = 0
-}, Body)
-Corner(Sidebar, 12)
-Stroke(Sidebar, Color3.fromRGB(35,35,35), 1, 0)
-New("UIPadding", {
-    PaddingTop = UDim.new(0, 10),
-    PaddingLeft = UDim.new(0, 8),
-    PaddingRight = UDim.new(0, 8)
-}, Sidebar)
-
-local SideList = New("UIListLayout", {
-    Padding = UDim.new(0, 7),
-    SortOrder = Enum.SortOrder.LayoutOrder
-}, Sidebar)
-
-local ContentArea = New("Frame", {
-    Size = UDim2.new(1, -204, 1, -18),
-    Position = UDim2.fromOffset(194, 9),
-    BackgroundTransparency = 1
-}, Body)
-
-local pages = {}
-local tabs = {}
-local activePage = nil
-
-local tabDefinitions = {
-    {"Home", "H"},
-    {"Main", "M"},
-    {"Player", "P"},
-    {"Visual", "V"},
-    {"World", "W"},
-    {"Teleport", "T"},
-    {"Settings", "S"}
-}
-
-local function CreateTab(name, icon, order)
-    local button = New("TextButton", {
-        Name = name,
-        Size = UDim2.new(1, 0, 0, 42),
-        BackgroundColor3 = Color3.fromRGB(12,12,12),
-        Text = "",
-        AutoButtonColor = false,
-        LayoutOrder = order,
-        BorderSizePixel = 0
-    }, Sidebar)
-    Corner(button, 9)
-    local st = Stroke(button, Color3.fromRGB(35,35,35), 1, 0.35)
-    local ic = Label(button, icon, UDim2.fromOffset(38, 42), UDim2.fromOffset(3,0), 21, WHITE, Enum.Font.Gotham)
-    ic.TextXAlignment = Enum.TextXAlignment.Center
-    local tx = Label(button, name, UDim2.new(1, -47, 1, 0), UDim2.fromOffset(44,0), 14, WHITE, Enum.Font.GothamMedium)
-    tabs[name] = {Button = button, Icon = ic, Text = tx, Stroke = st}
-    return button
-end
-
-for i, def in ipairs(tabDefinitions) do
-    CreateTab(def[1], def[2], i)
-end
-
---==================================================
--- PAGE HELPERS
---==================================================
-local function CreatePage(name)
-    local page = New("ScrollingFrame", {
-        Name = name .. "Page",
-        Size = UDim2.fromScale(1, 1),
-        BackgroundTransparency = 1,
-        BorderSizePixel = 0,
-        ScrollBarThickness = 5,
-        ScrollBarImageColor3 = GOLD,
-        CanvasSize = UDim2.new(0,0,0,0),
-        AutomaticCanvasSize = Enum.AutomaticSize.Y,
-        ScrollingDirection = Enum.ScrollingDirection.Y,
-        Visible = false
-    }, ContentArea)
-    New("UIPadding", {
-        PaddingTop = UDim.new(0, 2),
-        PaddingLeft = UDim.new(0, 2),
-        PaddingRight = UDim.new(0, 7),
-        PaddingBottom = UDim.new(0, 12)
-    }, page)
-    pages[name] = page
-    return page
-end
-
-local function PageTitle(page, title, subtitle)
-    local titleLabel = Label(page, title, UDim2.new(1, -4, 0, 42), nil, 25, WHITE, Enum.Font.GothamBold)
-    local sub = Label(page, subtitle or "", UDim2.new(1, -4, 0, 22), UDim2.fromOffset(0, 38), 11, GREY, Enum.Font.GothamMedium)
-    return titleLabel, sub
-end
-
-local function SetActive(name)
-    for tabName, data in pairs(tabs) do
-        local active = tabName == name
-        data.Button.BackgroundColor3 = active and Color3.fromRGB(52, 39, 9) or Color3.fromRGB(12,12,12)
-        data.Icon.TextColor3 = active and GOLD2 or WHITE
-        data.Text.TextColor3 = active and GOLD2 or WHITE
-        data.Stroke.Color = active and GOLD or Color3.fromRGB(35,35,35)
-        data.Stroke.Transparency = active and 0 or 0.35
-    end
-    for pageName, page in pairs(pages) do
-        page.Visible = pageName == name
-    end
-    activePage = name
-end
-
---==================================================
--- GENERIC UI CARDS / TOGGLES
---==================================================
-local function Card(parent, title, height)
-    local card = New("Frame", {
-        Size = UDim2.new(1, -4, 0, height or 100),
-        BackgroundColor3 = PANEL,
-        BorderSizePixel = 0
-    }, parent)
-    Corner(card, 12)
-    Stroke(card, Color3.fromRGB(42,42,42), 1, 0.1)
-    Label(card, title, UDim2.new(1,-28,0,28), UDim2.fromOffset(14,8), 16, WHITE, Enum.Font.GothamBold)
-    return card
-end
-
-local function ToggleRow(parent, text, icon, order)
-    local row = New("TextButton", {
-        Size = UDim2.new(1, -24, 0, 46),
-        BackgroundColor3 = ROW,
-        BorderSizePixel = 0,
-        Text = "",
-        AutoButtonColor = false,
-        LayoutOrder = order or 1
-    }, parent)
-    Corner(row, 9)
-    Stroke(row, Color3.fromRGB(42,42,42), 1, 0.15)
-    local ico = Label(row, icon or "-", UDim2.fromOffset(36,46), UDim2.fromOffset(5,0), 19, GOLD2, Enum.Font.GothamBold)
-    ico.TextXAlignment = Enum.TextXAlignment.Center
-    Label(row, text, UDim2.new(1,-105,1,0), UDim2.fromOffset(47,0), 13, WHITE, Enum.Font.GothamMedium)
-    local track = New("Frame", {
-        Size = UDim2.fromOffset(43, 24),
-        Position = UDim2.new(1,-56,0.5,-12),
-        BackgroundColor3 = Color3.fromRGB(38,38,38),
-        BorderSizePixel = 0
-    }, row)
-    Corner(track, 12)
-    local knob = New("Frame", {
-        Size = UDim2.fromOffset(18,18),
-        Position = UDim2.fromOffset(3,3),
-        BackgroundColor3 = WHITE,
-        BorderSizePixel = 0
-    }, track)
-    Corner(knob, 10)
-    local state = false
-    row.MouseButton1Click:Connect(function()
-        state = not state
-        track.BackgroundColor3 = state and GOLD or Color3.fromRGB(38,38,38)
-        knob.Position = state and UDim2.fromOffset(22,3) or UDim2.fromOffset(3,3)
-        knob.BackgroundColor3 = state and Color3.fromRGB(25,25,25) or WHITE
-    end)
-    return row
-end
-
-local function Stack(parent, gap)
-    return New("UIListLayout", {
-        Padding = UDim.new(0, gap or 8),
-        SortOrder = Enum.SortOrder.LayoutOrder
-    }, parent)
-end
-
---==================================================
--- HOME PAGE
---==================================================
-local Home = CreatePage("Home")
-PageTitle(Home, "Home", "Simple - Clean - Powerful")
-local Hero = New("Frame", {
-    Size = UDim2.new(1,-4,0,280),
-    BackgroundColor3 = Color3.fromRGB(7,7,7),
-    BorderSizePixel = 0
-}, Home)
-Corner(Hero, 15)
-Stroke(Hero, GOLD, 1, 0.15)
-Label(Hero, "A", UDim2.new(1,0,0,65), UDim2.fromOffset(0,25), 54, GOLD2, Enum.Font.GothamBlack).TextXAlignment = Enum.TextXAlignment.Center
-local heroA = Label(Hero, "A M I E N", UDim2.new(1,0,0,65), UDim2.fromOffset(0,78), 43, GOLD2, Enum.Font.GothamBlack)
-heroA.TextXAlignment = Enum.TextXAlignment.Center
-local welcome = New("Frame", {
-    Size = UDim2.new(0.7,0,0,58),
-    Position = UDim2.new(0.15,0,1,-72),
-    BackgroundColor3 = Color3.fromRGB(8,8,8),
-    BorderSizePixel = 0
-}, Hero)
-Corner(welcome, 28)
-Stroke(welcome, GOLD, 1, 0.05)
-local wl = Label(welcome, "Welcome to Amien.Hub V2", UDim2.new(1,0,0,26), UDim2.fromOffset(0,4), 15, WHITE, Enum.Font.GothamBold)
-wl.TextXAlignment = Enum.TextXAlignment.Center
-local ws = Label(welcome, "Simple - Clean - Powerful", UDim2.new(1,0,0,20), UDim2.fromOffset(0,30), 11, GREY, Enum.Font.GothamMedium)
-ws.TextXAlignment = Enum.TextXAlignment.Center
-
-local HomeInfo = Card(Home, "Information", 105)
-Label(HomeInfo, "Amien.Hub V2", UDim2.new(1,-28,0,24), UDim2.fromOffset(14,40), 14, GOLD2, Enum.Font.GothamBold)
-Label(HomeInfo, "Responsive black & gold interface with scrollable pages.", UDim2.new(1,-28,0,24), UDim2.fromOffset(14,66), 12, WHITE, Enum.Font.GothamMedium)
-
-local HomeStatus = Card(Home, "Status", 105)
-Label(HomeStatus, "READY", UDim2.new(1,-28,0,24), UDim2.fromOffset(14,40), 14, GREEN, Enum.Font.GothamBold)
-Label(HomeStatus, "UI loaded for " .. Player.DisplayName, UDim2.new(1,-28,0,24), UDim2.fromOffset(14,66), 12, WHITE, Enum.Font.GothamMedium)
-
---==================================================
--- MAIN PAGE
---==================================================
-local MainPage = CreatePage("Main")
-PageTitle(MainPage, "Main", "Main Features")
-local MainCard = Card(MainPage, "Main Features", 300)
-local MainStack = Stack(MainCard, 7)
-MainStack.Parent = MainCard
-local mainItems = {
-    {"Auto Farm", "AF"},
-    {"Auto Collect", "AC"},
-    {"Auto Quest", "AQ"},
-    {"Auto Upgrade", "AU"},
-    {"Auto Rebirth", "AR"}
-}
-for i, item in ipairs(mainItems) do ToggleRow(MainCard, item[1], item[2], i) end
-
---==================================================
--- PLAYER PAGE - DYNAMIC USER DATA
---==================================================
-local PlayerPage = CreatePage("Player")
-PageTitle(PlayerPage, "Player", "Your Roblox profile & live player information")
-
-local ProfileCard = New("Frame", {
-    Size = UDim2.new(1,-4,0,252),
-    BackgroundColor3 = PANEL,
-    BorderSizePixel = 0
-}, PlayerPage)
-Corner(ProfileCard, 14)
-Stroke(ProfileCard, Color3.fromRGB(55,55,55), 1, 0)
-
-local AvatarBox = New("Frame", {
-    Size = UDim2.new(0,174,1,-24),
-    Position = UDim2.fromOffset(12,12),
-    BackgroundColor3 = Color3.fromRGB(24,24,24),
-    BorderSizePixel = 0
-}, ProfileCard)
-Corner(AvatarBox, 12)
-Stroke(AvatarBox, GOLD, 1, 0.25)
-
-local Avatar = New("ImageLabel", {
-    Name = "Avatar",
-    Size = UDim2.new(1,-18,1,-18),
-    Position = UDim2.fromOffset(9,9),
-    BackgroundTransparency = 1,
-    Image = "",
-    ScaleType = Enum.ScaleType.Fit
-}, AvatarBox)
-
-local AvatarBorder = New("Frame", {
-    Size = UDim2.new(1,-8,1,-8), Position = UDim2.fromOffset(4,4),
-    BackgroundTransparency = 1, BorderSizePixel = 0, ZIndex = 2
-}, AvatarBox)
-Corner(AvatarBorder, 12)
-Stroke(AvatarBorder, GOLD2, 1, 0.72)
-
-local AvatarTag = Label(AvatarBox, "PLAYER", UDim2.new(1,-16,0,18), UDim2.fromOffset(8,7), 8, GOLD2, Enum.Font.GothamBold)
-AvatarTag.TextXAlignment = Enum.TextXAlignment.Center
-AvatarTag.ZIndex = 3
-
-local AvatarName = Label(ProfileCard, "Your Information", UDim2.new(1,-235,0,30), UDim2.fromOffset(230,12), 17, WHITE, Enum.Font.GothamBold)
-
-local InfoList = New("Frame", {
-    Size = UDim2.new(1,-205,1,-54),
-    Position = UDim2.fromOffset(205,47),
-    BackgroundTransparency = 1
-}, ProfileCard)
-local infoLayout = Stack(InfoList, 6)
-
-local function InfoRow(labelText, icon)
-    local row = New("Frame", {
-        Size = UDim2.new(1,0,0,34),
-        BackgroundColor3 = ROW,
-        BorderSizePixel = 0
-    }, InfoList)
-    Corner(row, 8)
-    Stroke(row, Color3.fromRGB(48,48,48), 1, 0.12)
-
-    local i = Label(row, icon or "-", UDim2.fromOffset(30,34), UDim2.fromOffset(5,0), 12, GOLD2, Enum.Font.GothamBold)
-    i.TextXAlignment = Enum.TextXAlignment.Center
-
-    local l = Label(row, labelText, UDim2.fromOffset(92,34), UDim2.fromOffset(38,0), 11, GREY, Enum.Font.GothamMedium)
-    l.TextXAlignment = Enum.TextXAlignment.Left
-    l.TextTruncate = Enum.TextTruncate.AtEnd
-
-    New("Frame", {
-        Size = UDim2.new(0,1,0,18), Position = UDim2.fromOffset(132,8),
-        BackgroundColor3 = Color3.fromRGB(65,65,65), BackgroundTransparency = 0.35,
-        BorderSizePixel = 0
-    }, row)
-
-    local v = Label(row, "--", UDim2.new(1,-150,1,0), UDim2.fromOffset(143,0), 11, WHITE, Enum.Font.GothamBold)
-    v.TextXAlignment = Enum.TextXAlignment.Left
-    v.TextTruncate = Enum.TextTruncate.AtEnd
-    return v
-end
-
-local usernameValue = InfoRow("Username", "U")
-local displayValue = InfoRow("Display Name", "D")
-local userIdValue = InfoRow("User ID", "ID")
-local speedValue = InfoRow("Speed", "SP")
-local moneyValue = InfoRow("Money / Cash", "$")
-
-local function GetHumanoid()
-    local character = Player.Character
-    if not character then return nil end
-    return character:FindFirstChildOfClass("Humanoid")
-end
-
-local function FindMoneyValue()
-    local roots = {Player, Player:FindFirstChild("leaderstats")}
-    local wanted = {
-        cash=true, money=true, coins=true, coin=true, currency=true,
-        gold=true, gems=true, gem=true, balance=true, credits=true
+    local BGGrad = Instance.new("UIGradient")
+    BGGrad.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0,Color3.fromRGB(3,3,3)),
+        ColorSequenceKeypoint.new(0.55,Color3.fromRGB(8,7,4)),
+        ColorSequenceKeypoint.new(1,Color3.fromRGB(2,2,2))
     }
-    for _, root in ipairs(roots) do
-        if root then
-            for _, obj in ipairs(root:GetDescendants()) do
-                if (obj:IsA("IntValue") or obj:IsA("NumberValue") or obj:IsA("StringValue")) then
-                    local n = string.lower(obj.Name)
-                    if wanted[n] then return obj end
+    BGGrad.Rotation = 25
+    BGGrad.Parent = BG
+
+    local Glow1 = Instance.new("Frame")
+    Glow1.Size = UDim2.fromOffset(300,300)
+    Glow1.Position = UDim2.new(1,-230,0,-120)
+    Glow1.BackgroundColor3 = Color3.fromRGB(70,48,8)
+    Glow1.BackgroundTransparency = 0.72
+    Glow1.BorderSizePixel = 0
+    Glow1.ZIndex = 0
+    Glow1.Parent = BG
+    local Glow1Corner = Instance.new("UICorner")
+    Glow1Corner.CornerRadius = UDim.new(1,0)
+    Glow1Corner.Parent = Glow1
+
+    local Glow2 = Instance.new("Frame")
+    Glow2.Size = UDim2.fromOffset(220,220)
+    Glow2.Position = UDim2.new(-0.08,0,0.72,0)
+    Glow2.BackgroundColor3 = Color3.fromRGB(50,36,8)
+    Glow2.BackgroundTransparency = 0.82
+    Glow2.BorderSizePixel = 0
+    Glow2.ZIndex = 0
+    Glow2.Parent = BG
+    local Glow2Corner = Instance.new("UICorner")
+    Glow2Corner.CornerRadius = UDim.new(1,0)
+    Glow2Corner.Parent = Glow2
+
+    local function AddLine(parent,x,y,w,rot,transparency)
+        local line = Instance.new("Frame")
+        line.Size = UDim2.fromOffset(w,1)
+        line.Position = UDim2.new(x,0,y,0)
+        line.Rotation = rot
+        line.BackgroundColor3 = GOLD
+        line.BackgroundTransparency = transparency
+        line.BorderSizePixel = 0
+        line.ZIndex = 0
+        line.Parent = parent
+        return line
+    end
+    AddLine(BG,-0.08,0.18,520,-25,0.84)
+    AddLine(BG,0.48,0.90,520,-25,0.88)
+    AddLine(BG,0.42,0.22,360,25,0.92)
+
+    -- Header
+    local Header = Instance.new("Frame")
+    Header.Size = UDim2.new(1,0,0,78)
+    Header.BackgroundColor3 = Color3.fromRGB(3,3,3)
+    Header.BorderSizePixel = 0
+    Header.ZIndex = 5
+    Header.Parent = Main
+
+    local HeaderGrad = Instance.new("UIGradient")
+    HeaderGrad.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0,Color3.fromRGB(8,8,8)),
+        ColorSequenceKeypoint.new(0.65,Color3.fromRGB(2,2,2)),
+        ColorSequenceKeypoint.new(1,Color3.fromRGB(22,15,3))
+    }
+    HeaderGrad.Parent = Header
+
+    -- Shape-based crown: avoids unsupported Unicode glyphs.
+    local CrownHolder = Instance.new("Frame")
+    CrownHolder.Size = UDim2.fromOffset(52,52)
+    CrownHolder.Position = UDim2.fromOffset(12,13)
+    CrownHolder.BackgroundTransparency = 1
+    CrownHolder.ZIndex = 7
+    CrownHolder.Parent = Header
+    local CrownBase = Instance.new("Frame")
+    CrownBase.Size = UDim2.fromOffset(32,5)
+    CrownBase.Position = UDim2.fromOffset(10,35)
+    CrownBase.BackgroundColor3 = GOLD2
+    CrownBase.BorderSizePixel = 0
+    CrownBase.ZIndex = 7
+    CrownBase.Parent = CrownHolder
+    local CrownBaseCorner = Instance.new("UICorner")
+    CrownBaseCorner.CornerRadius = UDim.new(0,2)
+    CrownBaseCorner.Parent = CrownBase
+    for i=0,2 do
+        local d = Instance.new("Frame")
+        d.Size = UDim2.fromOffset(9,9)
+        d.Position = UDim2.fromOffset(10+i*11,27-i*7)
+        d.Rotation = 45
+        d.BackgroundColor3 = GOLD2
+        d.BorderSizePixel = 0
+        d.ZIndex = 7
+        d.Parent = CrownHolder
+        local dc = Instance.new("UICorner")
+        dc.CornerRadius = UDim.new(0,2)
+        dc.Parent = d
+    end
+
+    local Title = Instance.new("TextLabel")
+    Title.Size = UDim2.new(0,240,0,38)
+    Title.Position = UDim2.fromOffset(72,9)
+    Title.BackgroundTransparency = 1
+    Title.Text = "AMIEN.HUB"
+    Title.TextColor3 = GOLD2
+    Title.TextSize = 30
+    Title.Font = Enum.Font.GothamBlack
+    Title.TextXAlignment = Enum.TextXAlignment.Left
+    Title.ZIndex = 7
+    Title.Parent = Header
+
+    local Subtitle = Instance.new("TextLabel")
+    Subtitle.Size = UDim2.new(0,300,0,18)
+    Subtitle.Position = UDim2.fromOffset(73,47)
+    Subtitle.BackgroundTransparency = 1
+    Subtitle.Text = "PREMIUM UI  -  SIMPLE  -  CLEAN"
+    Subtitle.TextColor3 = GREY
+    Subtitle.TextSize = 9
+    Subtitle.Font = Enum.Font.GothamMedium
+    Subtitle.TextXAlignment = Enum.TextXAlignment.Left
+    Subtitle.ZIndex = 7
+    Subtitle.Parent = Header
+
+    local Minimize = Instance.new("TextButton")
+    Minimize.Size = UDim2.fromOffset(36,30)
+    Minimize.Position = UDim2.new(1,-82,0,24)
+    Minimize.BackgroundColor3 = PANEL2
+    Minimize.Text = "-"
+    Minimize.TextColor3 = GOLD2
+    Minimize.TextSize = 20
+    Minimize.Font = Enum.Font.GothamBold
+    Minimize.BorderSizePixel = 0
+    Minimize.AutoButtonColor = false
+    Minimize.ZIndex = 8
+    Minimize.Parent = Header
+    local mc = Instance.new("UICorner")
+    mc.CornerRadius = UDim.new(0,8)
+    mc.Parent = Minimize
+
+    local Close = Instance.new("TextButton")
+    Close.Size = UDim2.fromOffset(36,30)
+    Close.Position = UDim2.new(1,-41,0,24)
+    Close.BackgroundColor3 = PANEL2
+    Close.Text = "X"
+    Close.TextColor3 = GOLD2
+    Close.TextSize = 16
+    Close.Font = Enum.Font.GothamBold
+    Close.BorderSizePixel = 0
+    Close.AutoButtonColor = false
+    Close.ZIndex = 8
+    Close.Parent = Header
+    local cc = Instance.new("UICorner")
+    cc.CornerRadius = UDim.new(0,8)
+    cc.Parent = Close
+
+    local Body = Instance.new("Frame")
+    Body.Size = UDim2.new(1,0,1,-78)
+    Body.Position = UDim2.fromOffset(0,78)
+    Body.BackgroundTransparency = 1
+    Body.ZIndex = 2
+    Body.Parent = Main
+
+    local Sidebar = Instance.new("Frame")
+    Sidebar.Size = UDim2.new(0,176,1,-18)
+    Sidebar.Position = UDim2.fromOffset(10,9)
+    Sidebar.BackgroundColor3 = Color3.fromRGB(7,7,7)
+    Sidebar.BackgroundTransparency = 0.08
+    Sidebar.BorderSizePixel = 0
+    Sidebar.ZIndex = 4
+    Sidebar.Parent = Body
+    local sc = Instance.new("UICorner")
+    sc.CornerRadius = UDim.new(0,12)
+    sc.Parent = Sidebar
+    local ss = Instance.new("UIStroke")
+    ss.Color = Color3.fromRGB(40,32,18)
+    ss.Thickness = 1
+    ss.Parent = Sidebar
+
+    local sidePad = Instance.new("UIPadding")
+    sidePad.PaddingTop = UDim.new(0,10)
+    sidePad.PaddingLeft = UDim.new(0,8)
+    sidePad.PaddingRight = UDim.new(0,8)
+    sidePad.Parent = Sidebar
+    local sideList = Instance.new("UIListLayout")
+    sideList.Padding = UDim.new(0,7)
+    sideList.SortOrder = Enum.SortOrder.LayoutOrder
+    sideList.Parent = Sidebar
+
+    local tabs = {}
+    local function CreateTab(name,icon,order)
+        local b = Instance.new("TextButton")
+        b.Name = name
+        b.LayoutOrder = order
+        b.Size = UDim2.new(1,0,0,44)
+        b.BackgroundColor3 = Color3.fromRGB(12,12,12)
+        b.BorderSizePixel = 0
+        b.Text = ""
+        b.AutoButtonColor = false
+        b.ZIndex = 6
+        b.Parent = Sidebar
+        local bc = Instance.new("UICorner")
+        bc.CornerRadius = UDim.new(0,9)
+        bc.Parent = b
+        local bs = Instance.new("UIStroke")
+        bs.Color = Color3.fromRGB(35,35,35)
+        bs.Thickness = 1
+        bs.Parent = b
+        local il = Instance.new("TextLabel")
+        il.Size = UDim2.fromOffset(38,44)
+        il.BackgroundTransparency = 1
+        il.Text = icon
+        il.TextColor3 = WHITE
+        il.TextSize = 13
+        il.Font = Enum.Font.GothamBold
+        il.ZIndex = 7
+        il.Parent = b
+        local tl = Instance.new("TextLabel")
+        tl.Size = UDim2.new(1,-48,1,0)
+        tl.Position = UDim2.fromOffset(44,0)
+        tl.BackgroundTransparency = 1
+        tl.Text = name
+        tl.TextColor3 = WHITE
+        tl.TextSize = 14
+        tl.Font = Enum.Font.GothamMedium
+        tl.TextXAlignment = Enum.TextXAlignment.Left
+        tl.ZIndex = 7
+        tl.Parent = b
+        tabs[name] = {Button=b,Icon=il,Text=tl,Stroke=bs}
+        return b
+    end
+
+    CreateTab("Home","H",1)
+    CreateTab("Main","M",2)
+    CreateTab("Player","P",3)
+    CreateTab("Visual","V",4)
+    CreateTab("World","W",5)
+    CreateTab("Teleport","T",6)
+    CreateTab("Settings","S",7)
+
+    local Content = Instance.new("ScrollingFrame")
+    Content.Name = "Content"
+    Content.Size = UDim2.new(1,-198,1,-18)
+    Content.Position = UDim2.fromOffset(190,9)
+    Content.BackgroundTransparency = 1
+    Content.BorderSizePixel = 0
+    Content.ScrollBarThickness = 4
+    Content.ScrollBarImageColor3 = GOLD
+    Content.CanvasSize = UDim2.new(0,0,0,700)
+    Content.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    Content.ScrollingDirection = Enum.ScrollingDirection.Y
+    Content.ZIndex = 3
+    Content.Parent = Body
+
+    local PageHolder = Instance.new("Frame")
+    PageHolder.Size = UDim2.new(1,-10,0,680)
+    PageHolder.BackgroundTransparency = 1
+    PageHolder.ZIndex = 4
+    PageHolder.Parent = Content
+
+    local function ClearPage()
+        for _,v in ipairs(PageHolder:GetChildren()) do v:Destroy() end
+    end
+
+    local function AddLabel(text,y,size,color)
+        local l = Instance.new("TextLabel")
+        l.Size = UDim2.new(1,-18,0,size or 30)
+        l.Position = UDim2.fromOffset(0,y)
+        l.BackgroundTransparency = 1
+        l.Text = text
+        l.TextColor3 = color or WHITE
+        l.TextSize = 15
+        l.Font = Enum.Font.GothamMedium
+        l.TextXAlignment = Enum.TextXAlignment.Left
+        l.ZIndex = 5
+        l.Parent = PageHolder
+        return l
+    end
+
+    local function Card(y,h,title,desc)
+        local c = Instance.new("Frame")
+        c.Size = UDim2.new(1,-18,0,h)
+        c.Position = UDim2.fromOffset(0,y)
+        c.BackgroundColor3 = PANEL
+        c.BorderSizePixel = 0
+        c.ZIndex = 5
+        c.Parent = PageHolder
+        local cr = Instance.new("UICorner")
+        cr.CornerRadius = UDim.new(0,12)
+        cr.Parent = c
+        local st = Instance.new("UIStroke")
+        st.Color = Color3.fromRGB(58,46,22)
+        st.Thickness = 1
+        st.Parent = c
+        local t = Instance.new("TextLabel")
+        t.Size = UDim2.new(1,-28,0,28)
+        t.Position = UDim2.fromOffset(14,10)
+        t.BackgroundTransparency = 1
+        t.Text = title
+        t.TextColor3 = GOLD2
+        t.TextSize = 18
+        t.Font = Enum.Font.GothamBold
+        t.TextXAlignment = Enum.TextXAlignment.Left
+        t.ZIndex = 6
+        t.Parent = c
+        if desc then
+            local d = Instance.new("TextLabel")
+            d.Size = UDim2.new(1,-28,1,-46)
+            d.Position = UDim2.fromOffset(14,42)
+            d.BackgroundTransparency = 1
+            d.Text = desc
+            d.TextColor3 = GREY
+            d.TextSize = 13
+            d.Font = Enum.Font.GothamMedium
+            d.TextWrapped = true
+            d.TextXAlignment = Enum.TextXAlignment.Left
+            d.TextYAlignment = Enum.TextYAlignment.Top
+            d.ZIndex = 6
+            d.Parent = c
+        end
+        return c
+    end
+
+    local function GetCash()
+        local keys = {"cash","money","coins","coin","currency","gold","gems","gem","balance","credits"}
+        local function matches(n)
+            n = string.lower(n)
+            for _,k in ipairs(keys) do
+                if n == k or string.find(n,k,1,true) then return true end
+            end
+            return false
+        end
+        local containers = {Player,Player:FindFirstChild("leaderstats")}
+        for _,container in ipairs(containers) do
+            if container then
+                for _,obj in ipairs(container:GetDescendants()) do
+                    if (obj:IsA("IntValue") or obj:IsA("NumberValue") or obj:IsA("StringValue")) and matches(obj.Name) then
+                        return tostring(obj.Value)
+                    end
                 end
             end
         end
+        return "--"
     end
-    return nil
-end
 
-local function UpdatePlayerInfo()
-    usernameValue.Text = Player.Name
-    displayValue.Text = Player.DisplayName
-    userIdValue.Text = tostring(Player.UserId)
-    local humanoid = GetHumanoid()
-    speedValue.Text = humanoid and string.format("%.0f", humanoid.WalkSpeed) or "--"
-    local money = FindMoneyValue()
-    moneyValue.Text = money and tostring(money.Value) or "--"
-end
-
-task.spawn(function()
-    local ok, image = pcall(function()
-        local content, _ = Players:GetUserThumbnailAsync(
-            Player.UserId,
-            Enum.ThumbnailType.AvatarThumbnail,
-            Enum.ThumbnailSize.Size420x420
-        )
-        return content
-    end)
-    if ok and image then Avatar.Image = image end
-end)
-
-UpdatePlayerInfo()
-Player.CharacterAdded:Connect(function()
-    task.wait(0.5)
-    UpdatePlayerInfo()
-end)
-
-local playerInfoConnection = true
-task.spawn(function()
-    while Gui.Parent do
-        if activePage == "Player" then
-            UpdatePlayerInfo()
-        end
-        task.wait(0.5)
+    local function MakeRow(parent,y,label,value)
+        local row = Instance.new("Frame")
+        row.Size = UDim2.new(1,-28,0,34)
+        row.Position = UDim2.fromOffset(14,y)
+        row.BackgroundColor3 = Color3.fromRGB(18,18,18)
+        row.BorderSizePixel = 0
+        row.ZIndex = 7
+        row.Parent = parent
+        local rc = Instance.new("UICorner")
+        rc.CornerRadius = UDim.new(0,7)
+        rc.Parent = row
+        local l = Instance.new("TextLabel")
+        l.Size = UDim2.new(0.38,0,1,0)
+        l.Position = UDim2.fromOffset(10,0)
+        l.BackgroundTransparency = 1
+        l.Text = label
+        l.TextColor3 = GREY
+        l.TextSize = 12
+        l.Font = Enum.Font.GothamMedium
+        l.TextXAlignment = Enum.TextXAlignment.Left
+        l.ZIndex = 8
+        l.Parent = row
+        local v = Instance.new("TextLabel")
+        v.Size = UDim2.new(0.58,-10,1,0)
+        v.Position = UDim2.new(0.40,0,0,0)
+        v.BackgroundTransparency = 1
+        v.Text = value
+        v.TextColor3 = WHITE
+        v.TextSize = 12
+        v.Font = Enum.Font.GothamBold
+        v.TextXAlignment = Enum.TextXAlignment.Right
+        v.TextTruncate = Enum.TextTruncate.AtEnd
+        v.ZIndex = 8
+        v.Parent = row
+        return v
     end
-end)
 
---==================================================
--- VISUAL PAGE
---==================================================
-local VisualPage = CreatePage("Visual")
-PageTitle(VisualPage, "Visual", "Visual Features")
-local VisualCard = Card(VisualPage, "Visual Features", 300)
-Stack(VisualCard, 7)
-local visualItems = {
-    {"ESP Player", "EP"},
-    {"ESP Item", "EI"},
-    {"ESP Chest", "EC"},
-    {"Fullbright", "FB"},
-    {"No Fog", "NF"}
-}
-for i, item in ipairs(visualItems) do ToggleRow(VisualCard, item[1], item[2], i) end
+    local currentPage = "Home"
+    local playerValues = {}
 
---==================================================
--- WORLD PAGE
---==================================================
-local WorldPage = CreatePage("World")
-PageTitle(WorldPage, "World", "World Features")
-local WorldCard = Card(WorldPage, "World Features", 300)
-Stack(WorldCard, 7)
-local worldItems = {
-    {"Remove Grass", "RG"},
-    {"Remove Tree", "RT"},
-    {"Remove Rock", "RR"},
-    {"Low Texture", "LT"},
-    {"No Water", "NW"}
-}
-for i, item in ipairs(worldItems) do ToggleRow(WorldCard, item[1], item[2], i) end
-
---==================================================
--- TELEPORT PAGE - UI ONLY
---==================================================
-local TeleportPage = CreatePage("Teleport")
-PageTitle(TeleportPage, "Teleport", "Teleport Locations")
-local Search = New("TextBox", {
-    Size = UDim2.new(1,-4,0,42),
-    BackgroundColor3 = ROW,
-    BorderSizePixel = 0,
-    PlaceholderText = "Search location...",
-    PlaceholderColor3 = GREY,
-    Text = "",
-    TextColor3 = WHITE,
-    TextSize = 13,
-    Font = Enum.Font.GothamMedium,
-    ClearTextOnFocus = false
-}, TeleportPage)
-Corner(Search, 10)
-Stroke(Search, Color3.fromRGB(50,50,50), 1, 0)
-New("UIPadding", {PaddingLeft = UDim.new(0,12), PaddingRight = UDim.new(0,12)}, Search)
-
-local TeleportCard = New("Frame", {
-    Size = UDim2.new(1,-4,0,260),
-    BackgroundColor3 = PANEL,
-    BorderSizePixel = 0
-}, TeleportPage)
-Corner(TeleportCard, 12)
-Stroke(TeleportCard, Color3.fromRGB(42,42,42), 1, 0.1)
-New("UIGridLayout", {
-    CellSize = UDim2.new(0.32, -8, 0, 52),
-    CellPadding = UDim2.new(0.02, 0, 0, 8),
-    FillDirection = Enum.FillDirection.Horizontal,
-    SortOrder = Enum.SortOrder.LayoutOrder
-}, TeleportCard)
-New("UIPadding", {
-    PaddingTop = UDim.new(0, 12),
-    PaddingLeft = UDim.new(0, 12),
-    PaddingRight = UDim.new(0, 12),
-    PaddingBottom = UDim.new(0, 12)
-}, TeleportCard)
-
-local locations = {
-    {"Spawn", "SP"}, {"Shop", "SH"}, {"Island 1", "I1"},
-    {"Island 2", "I2"}, {"Boss", "BO"}, {"Event", "EV"},
-    {"Desert", "DE"}, {"Snow", "SN"}, {"Ocean", "OC"}
-}
-local locationButtons = {}
-for i, item in ipairs(locations) do
-    local b = New("TextButton", {
-        BackgroundColor3 = ROW,
-        BorderSizePixel = 0,
-        Text = "  " .. item[2] .. "    " .. item[1],
-        TextColor3 = WHITE,
-        TextSize = 12,
-        Font = Enum.Font.GothamMedium,
-        AutoButtonColor = false,
-        LayoutOrder = i
-    }, TeleportCard)
-    Corner(b, 9)
-    Stroke(b, GOLD, 1, 0.45)
-    b.MouseButton1Click:Connect(function()
-        -- UI-only: location selection is visual only.
-        for _, other in ipairs(locationButtons) do
-            other.BackgroundColor3 = ROW
-        end
-        b.BackgroundColor3 = Color3.fromRGB(52,39,9)
-    end)
-    table.insert(locationButtons, b)
-end
-
-Search:GetPropertyChangedSignal("Text"):Connect(function()
-    local q = string.lower(Search.Text)
-    for i, b in ipairs(locationButtons) do
-        local loc = locations[i][1]
-        b.Visible = q == "" or string.find(string.lower(loc), q, 1, true) ~= nil
+    local function RenderHome()
+        ClearPage()
+        AddLabel("Welcome to",0,32,WHITE).Font = Enum.Font.GothamBold
+        local h = AddLabel("Amien.Hub",34,48,GOLD2)
+        h.TextSize = 36
+        h.Font = Enum.Font.GothamBlack
+        AddLabel("BLACK / GOLD UI  -  READY",82,22,GREY)
+        local line = Instance.new("Frame")
+        line.Size = UDim2.fromOffset(65,3)
+        line.Position = UDim2.fromOffset(0,111)
+        line.BackgroundColor3 = GOLD
+        line.BorderSizePixel = 0
+        line.ZIndex = 5
+        line.Parent = PageHolder
+        Card(132,125,"Information","Clean interface\nSmooth performance\nEasy to use")
+        Card(270,125,"Status","UI Status: READY\nGame: Roblox\nMode: UI ONLY")
     end
-end)
 
---==================================================
--- SETTINGS PAGE
---==================================================
-local SettingsPage = CreatePage("Settings")
-PageTitle(SettingsPage, "Settings", "Save & Config")
-local SettingsCard = Card(SettingsPage, "Save & Config", 250)
-local settingsLayout = Stack(SettingsCard, 8)
-settingsLayout.Parent = SettingsCard
-
-local function ActionRow(parent, title, icon, actionText, order)
-    local row = New("Frame", {
-        Size = UDim2.new(1,-24,0,45),
-        BackgroundColor3 = ROW,
-        BorderSizePixel = 0,
-        LayoutOrder = order
-    }, parent)
-    Corner(row, 9)
-    Stroke(row, Color3.fromRGB(42,42,42), 1, 0.15)
-    local ic = Label(row, icon, UDim2.fromOffset(34,45), UDim2.fromOffset(5,0), 18, GOLD2, Enum.Font.GothamBold)
-    ic.TextXAlignment = Enum.TextXAlignment.Center
-    Label(row, title, UDim2.new(1,-135,1,0), UDim2.fromOffset(44,0), 13, WHITE, Enum.Font.GothamMedium)
-    local button = New("TextButton", {
-        Size = UDim2.fromOffset(105,33),
-        Position = UDim2.new(1,-113,0.5,-16),
-        BackgroundColor3 = GOLD2,
-        Text = actionText,
-        TextColor3 = Color3.fromRGB(20,20,20),
-        TextSize = 12,
-        Font = Enum.Font.GothamBold,
-        BorderSizePixel = 0,
-        AutoButtonColor = false
-    }, row)
-    Corner(button, 8)
-    return button
-end
-
-ActionRow(SettingsCard, "Save Config", "SV", "Save", 1)
-ActionRow(SettingsCard, "Load Config", "LD", "Load", 2)
-ActionRow(SettingsCard, "Reset Config", "RS", "Reset", 3)
-
-local KeyRow = New("Frame", {
-    Size = UDim2.new(1,-24,0,45),
-    BackgroundColor3 = ROW,
-    BorderSizePixel = 0,
-    LayoutOrder = 4
-}, SettingsCard)
-Corner(KeyRow, 9)
-Stroke(KeyRow, Color3.fromRGB(42,42,42), 1, 0.15)
-Label(KeyRow, "KEY", UDim2.fromOffset(34,45), UDim2.fromOffset(5,0), 18, GOLD2, Enum.Font.GothamBold).TextXAlignment = Enum.TextXAlignment.Center
-Label(KeyRow, "UI Toggle Key", UDim2.new(1,-150,1,0), UDim2.fromOffset(44,0), 13, WHITE, Enum.Font.GothamMedium)
-local KeyValue = New("TextLabel", {
-    Size = UDim2.fromOffset(105,33),
-    Position = UDim2.new(1,-113,0.5,-16),
-    BackgroundColor3 = Color3.fromRGB(25,25,25),
-    Text = "RightShift",
-    TextColor3 = WHITE,
-    TextSize = 12,
-    Font = Enum.Font.GothamBold,
-    BorderSizePixel = 0
-}, KeyRow)
-Corner(KeyValue, 8)
-Stroke(KeyValue, Color3.fromRGB(70,70,70), 1, 0.2)
-
---==================================================
--- TAB CONNECTIONS
---==================================================
-for name, data in pairs(tabs) do
-    data.Button.MouseButton1Click:Connect(function()
-        SetActive(name)
-    end)
-end
-
---==================================================
--- MAIN WINDOW DRAG
---==================================================
-local dragging = false
-local dragStart
-local startPos
-Header.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true
-        dragStart = input.Position
-        startPos = Main.Position
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then dragging = false end
+    local function RenderPlayer()
+        ClearPage()
+        AddLabel("PLAYER",0,32,GOLD2).Font = Enum.Font.GothamBlack
+        AddLabel("Live information from the current Roblox client",34,22,GREY)
+        local avatarCard = Card(70,120,"PLAYER PROFILE",nil)
+        local avatar = Instance.new("ImageLabel")
+        avatar.Size = UDim2.fromOffset(82,82)
+        avatar.Position = UDim2.fromOffset(16,28)
+        avatar.BackgroundColor3 = PANEL2
+        avatar.BorderSizePixel = 0
+        avatar.ZIndex = 7
+        avatar.Parent = avatarCard
+        local ac = Instance.new("UICorner")
+        ac.CornerRadius = UDim.new(1,0)
+        ac.Parent = avatar
+        local okThumb,url = pcall(function()
+            return Players:GetUserThumbnailAsync(Player.UserId,Enum.ThumbnailType.AvatarBust,Enum.ThumbnailSize.Size150x150)
         end)
-    end
-end)
-UserInputService.InputChanged:Connect(function(input)
-    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-        local delta = input.Position - dragStart
-        Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
-end)
+        if okThumb then avatar.Image = url end
+        local name = Instance.new("TextLabel")
+        name.Size = UDim2.new(1,-120,0,28)
+        name.Position = UDim2.fromOffset(112,38)
+        name.BackgroundTransparency = 1
+        name.Text = Player.Name
+        name.TextColor3 = WHITE
+        name.TextSize = 18
+        name.Font = Enum.Font.GothamBold
+        name.TextXAlignment = Enum.TextXAlignment.Left
+        name.ZIndex = 8
+        name.Parent = avatarCard
+        local dn = Instance.new("TextLabel")
+        dn.Size = UDim2.new(1,-120,0,22)
+        dn.Position = UDim2.fromOffset(112,68)
+        dn.BackgroundTransparency = 1
+        dn.Text = Player.DisplayName
+        dn.TextColor3 = GOLD2
+        dn.TextSize = 13
+        dn.Font = Enum.Font.GothamMedium
+        dn.TextXAlignment = Enum.TextXAlignment.Left
+        dn.ZIndex = 8
+        dn.Parent = avatarCard
 
---==================================================
--- FLOATING A + CROWN MINIMIZE BUTTON
---==================================================
-local Floating = New("TextButton", {
-    Name = "FloatingLogo",
-    Size = UDim2.fromOffset(54,54),
-    Position = UDim2.new(0.5,-27,0.5,-27),
-    AnchorPoint = Vector2.new(0.5,0.5),
-    BackgroundColor3 = Color3.fromRGB(7,7,7),
-    BorderSizePixel = 0,
-    Text = "",
-    AutoButtonColor = false,
-    Visible = false,
-    ZIndex = 100
-}, Gui)
-Corner(Floating, 27)
-Stroke(Floating, GOLD, 2, 0.05)
-
-local FloatCrown = Label(Floating, "^", UDim2.new(1,0,0,19), UDim2.fromOffset(0,1), 13, GOLD2, Enum.Font.GothamBlack)
-FloatCrown.TextXAlignment = Enum.TextXAlignment.Center
-FloatCrown.ZIndex = 101
-local FloatA = Label(Floating, "A", UDim2.new(1,0,0,34), UDim2.fromOffset(0,18), 24, GOLD2, Enum.Font.GothamBlack)
-FloatA.TextXAlignment = Enum.TextXAlignment.Center
-FloatA.ZIndex = 101
-
-local floatingDragging = false
-local floatMoved = false
-local floatDragStart
-local floatStartPos
-Floating.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        floatingDragging = true
-        floatMoved = false
-        floatDragStart = input.Position
-        floatStartPos = Floating.Position
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then floatingDragging = false end
-        end)
+        local info = Card(205,230,"PLAYER INFO",nil)
+        playerValues.username = MakeRow(info,48,"Username",Player.Name)
+        playerValues.display = MakeRow(info,86,"Display Name",Player.DisplayName)
+        playerValues.userid = MakeRow(info,124,"User ID",tostring(Player.UserId))
+        local hum = Player.Character and Player.Character:FindFirstChildOfClass("Humanoid")
+        playerValues.speed = MakeRow(info,162,"Speed",hum and tostring(hum.WalkSpeed) or "--")
+        playerValues.money = MakeRow(info,200,"Money / Cash",GetCash())
     end
-end)
-UserInputService.InputChanged:Connect(function(input)
-    if floatingDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-        local delta = input.Position - floatDragStart
-        if math.abs(delta.X) > 5 or math.abs(delta.Y) > 5 then
-            floatMoved = true
+
+    local function RenderGeneric(title,desc,items)
+        ClearPage()
+        AddLabel(title,0,32,GOLD2).Font = Enum.Font.GothamBlack
+        AddLabel(desc,34,24,GREY)
+        local y = 72
+        for _,item in ipairs(items) do
+            Card(y,72,item[1],item[2])
+            y += 82
         end
-        Floating.Position = UDim2.new(floatStartPos.X.Scale, floatStartPos.X.Offset + delta.X, floatStartPos.Y.Scale, floatStartPos.Y.Offset + delta.Y)
     end
-end)
 
-local minimized = false
-local savedSize = Main.Size
-local savedPosition = Main.Position
+    local function RenderPage(name)
+        currentPage = name
+        if name == "Home" then
+            RenderHome()
+        elseif name == "Player" then
+            RenderPlayer()
+        elseif name == "Main" then
+            RenderGeneric("MAIN","UI controls - feature placeholders only",{{"Auto Farm","Placeholder"},{"Auto Collect","Placeholder"},{"Auto Quest","Placeholder"},{"Auto Upgrade","Placeholder"},{"Auto Rebirth","Placeholder"}})
+        elseif name == "Visual" then
+            RenderGeneric("VISUAL","Visual options - presentation only",{{"ESP Player","Placeholder"},{"ESP Item","Placeholder"},{"ESP Chest","Placeholder"},{"Fullbright","Placeholder"},{"No Fog","Placeholder"}})
+        elseif name == "World" then
+            RenderGeneric("WORLD","World options - presentation only",{{"Remove Grass","Placeholder"},{"Remove Tree","Placeholder"},{"Remove Rock","Placeholder"},{"Low Texture","Placeholder"},{"No Water","Placeholder"}})
+        elseif name == "Teleport" then
+            RenderGeneric("TELEPORT","Location buttons - placeholders only",{{"Spawn","Placeholder"},{"Shop","Placeholder"},{"Island 1","Placeholder"},{"Island 2","Placeholder"},{"Boss","Placeholder"},{"Event","Placeholder"},{"Desert","Placeholder"},{"Snow","Placeholder"},{"Ocean","Placeholder"}})
+        else
+            RenderGeneric("SETTINGS","UI settings",{{"Save Config","UI placeholder"},{"Load Config","UI placeholder"},{"Reset Config","UI placeholder"},{"Toggle Key","RightShift"}})
+        end
+    end
 
-local function MinimizeUI()
-    if minimized then return end
-    minimized = true
-    savedSize = Main.Size
-    savedPosition = Main.Position
-    Main.Visible = false
-    -- Keep the floating logo exactly where the user last dragged it.
-    Floating.Visible = true
-end
+    local function SetActive(name)
+        for tabName,data in pairs(tabs) do
+            local active = tabName == name
+            data.Button.BackgroundColor3 = active and Color3.fromRGB(48,35,8) or Color3.fromRGB(12,12,12)
+            data.Icon.TextColor3 = active and GOLD2 or WHITE
+            data.Text.TextColor3 = active and GOLD2 or WHITE
+            data.Stroke.Color = active and GOLD or Color3.fromRGB(35,35,35)
+            data.Stroke.Transparency = active and 0 or 0.35
+        end
+        RenderPage(name)
+        Content.CanvasPosition = Vector2.new(0,0)
+    end
 
-local function RestoreUI()
-    if not minimized then return end
-    minimized = false
+    for name,data in pairs(tabs) do
+        data.Button.MouseButton1Click:Connect(function() SetActive(name) end)
+    end
+
+    -- Main panel dragging.
+    local dragging = false
+    local dragStart
+    local startPos
+    Header.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = Main.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then dragging = false end
+            end)
+        end
+    end)
+    UserInputService.InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            local delta = input.Position - dragStart
+            Main.Position = UDim2.new(startPos.X.Scale,startPos.X.Offset+delta.X,startPos.Y.Scale,startPos.Y.Offset+delta.Y)
+        end
+    end)
+
+    -- Small floating A/crown button. Position is preserved while dragging.
+    local Floating = Instance.new("TextButton")
+    Floating.Name = "FloatingLogo"
+    Floating.Size = UDim2.fromOffset(50,50)
+    Floating.Position = UDim2.new(0.5,-25,0.5,-25)
+    Floating.BackgroundColor3 = Color3.fromRGB(8,8,8)
+    Floating.BorderSizePixel = 0
+    Floating.Text = "A"
+    Floating.TextColor3 = GOLD2
+    Floating.TextSize = 22
+    Floating.Font = Enum.Font.GothamBlack
+    Floating.AutoButtonColor = false
     Floating.Visible = false
-    Main.Size = savedSize
-    Main.Position = savedPosition
-    Main.Visible = true
-end
+    Floating.ZIndex = 50
+    Floating.Parent = Gui
+    local fc = Instance.new("UICorner")
+    fc.CornerRadius = UDim.new(1,0)
+    fc.Parent = Floating
+    local fs = Instance.new("UIStroke")
+    fs.Color = GOLD
+    fs.Thickness = 2
+    fs.Parent = Floating
 
-Minimize.MouseButton1Click:Connect(MinimizeUI)
-Floating.MouseButton1Click:Connect(function()
-    if not floatMoved then RestoreUI() end
-    floatMoved = false
-end)
-
-Close.MouseButton1Click:Connect(function()
-    Gui:Destroy()
-end)
-
--- RightShift toggles the full UI.
-UserInputService.InputBegan:Connect(function(input, processed)
-    if processed then return end
-    if input.KeyCode == Enum.KeyCode.RightShift then
-        if minimized then RestoreUI() else MinimizeUI() end
+    local miniCrown = Instance.new("Frame")
+    miniCrown.Size = UDim2.fromOffset(24,12)
+    miniCrown.Position = UDim2.fromOffset(13,3)
+    miniCrown.BackgroundTransparency = 1
+    miniCrown.ZIndex = 52
+    miniCrown.Parent = Floating
+    for i=0,2 do
+        local d = Instance.new("Frame")
+        d.Size = UDim2.fromOffset(6,6)
+        d.Position = UDim2.fromOffset(i*8,5-i*3)
+        d.Rotation = 45
+        d.BackgroundColor3 = GOLD2
+        d.BorderSizePixel = 0
+        d.ZIndex = 53
+        d.Parent = miniCrown
     end
+
+    local floatingDragging = false
+    local fStart
+    local fPos
+    Floating.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            floatingDragging = true
+            fStart = input.Position
+            fPos = Floating.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then floatingDragging = false end
+            end)
+        end
+    end)
+    UserInputService.InputChanged:Connect(function(input)
+        if floatingDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            local delta = input.Position - fStart
+            Floating.Position = UDim2.new(fPos.X.Scale,fPos.X.Offset+delta.X,fPos.Y.Scale,fPos.Y.Offset+delta.Y)
+        end
+    end)
+
+    local minimized = false
+    Minimize.MouseButton1Click:Connect(function()
+        minimized = true
+        Main.Visible = false
+        Floating.Visible = true
+    end)
+    Floating.MouseButton1Click:Connect(function()
+        minimized = false
+        Floating.Visible = false
+        Main.Visible = true
+    end)
+    Close.MouseButton1Click:Connect(function() Gui:Destroy() end)
+
+    -- Refresh player values when character/values change.
+    task.spawn(function()
+        while Gui.Parent do
+            if currentPage == "Player" then
+                local hum = Player.Character and Player.Character:FindFirstChildOfClass("Humanoid")
+                if playerValues.speed then playerValues.speed.Text = hum and tostring(hum.WalkSpeed) or "--" end
+                if playerValues.money then playerValues.money.Text = GetCash() end
+            end
+            task.wait(1)
+        end
+    end)
+
+    SetActive("Home")
 end)
 
---==================================================
--- INITIAL STATE
---==================================================
-SetActive("Home")
+if not ok then
+    warn("[Amien.Hub] UI error: " .. tostring(err))
+end
