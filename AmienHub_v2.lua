@@ -6,7 +6,6 @@ local TeleportService = game:GetService("TeleportService")
 local TweenService = game:GetService("TweenService")
 local HttpService = game:GetService("HttpService")
 local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
 
 local LocalPlayer = Players.LocalPlayer
 local PlaceId = game.PlaceId
@@ -165,7 +164,7 @@ local AntiHitGuardsBtn, _, AntiHitStatusLabel, AntiHitDot, AntiHitStroke = Creat
 local InstantTpBtn, _, InstantTpStatusLabel, InstantTpDot, InstantTpStroke = CreateFeatureButton("InstantTpBtn", "INSTANT TELEPORT", 3)
 
 --------------------------------------------------------------------------------
--- AUTO HOP FUNCTION LOGIC
+-- AUTO HOP LOGIC
 --------------------------------------------------------------------------------
 local function StartAutoHop()
     if isAutoHopping then return end
@@ -223,23 +222,29 @@ local function StartAutoHop()
 end
 
 --------------------------------------------------------------------------------
--- LOGIKA UNTUK ANTI HIT GUARDS & INSTANT TELEPORT
+-- LOGIKA GAME: ANTI HIT GUARDS & INSTANT TELEPORT TO SAFE ZONE
 --------------------------------------------------------------------------------
 
--- Loop Logika Anti Hit Guards (Membuat Guard tidak bisa mengenai pemain)
+local function getSafeZoneCFrame()
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj.Name:lower():find("zona aman") or obj.Name:lower():find("safezone") or obj.Name:lower():find("safe zone") then
+            if obj:IsA("BasePart") then
+                return obj.CFrame + Vector3.new(0, 4, 0)
+            end
+        end
+    end
+    return workspace:FindFirstChild("SpawnLocation") and workspace.SpawnLocation.CFrame + Vector3.new(0, 4, 0)
+end
+
 RunService.Stepped:Connect(function()
     if isAntiHitGuardsActive then
-        local char = LocalPlayer.Character
-        if char and char:FindFirstChild("HumanoidRootPart") then
-            for _, v in ipairs(workspace:GetDescendants()) do
-                if v:IsA("Model") and (v.Name:find("Guard") or v.Name:find("GuardNPC")) then
-                    local hrp = v:FindFirstChild("HumanoidRootPart")
-                    if hrp then
-                        -- Mematikan CanCollide/Hitbox Guard di sekitar
-                        for _, part in ipairs(v:GetChildren()) do
-                            if part:IsA("BasePart") then
-                                part.CanCollide = false
-                            end
+        for _, obj in ipairs(workspace:GetDescendants()) do
+            if obj:IsA("Model") and (obj:FindFirstChild("Humanoid") or obj.Name:lower():find("guard") or obj.Name:lower():find("penjaga")) then
+                if not Players:GetPlayerFromCharacter(obj) then
+                    for _, part in ipairs(obj:GetDescendants()) do
+                        if part:IsA("BasePart") then
+                            part.CanTouch = false
+                            part.CanCollide = false
                         end
                     end
                 end
@@ -248,20 +253,23 @@ RunService.Stepped:Connect(function()
     end
 end)
 
--- Logika Instant Teleport (Teleportasi saat Klik Kiri / Tap di Layar jika fitur ON)
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if gameProcessed then return end
-    if isInstantTpActive and (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
-        local mouse = LocalPlayer:GetMouse()
-        local char = LocalPlayer.Character
-        if char and char:FindFirstChild("HumanoidRootPart") and mouse.Hit then
-            char:PivotTo(mouse.Hit + Vector3.new(0, 3, 0))
+task.spawn(function()
+    while task.wait(0.1) do
+        if isInstantTpActive then
+            local char = LocalPlayer.Character
+            if char and char:FindFirstChild("HumanoidRootPart") then
+                local safeCFrame = getSafeZoneCFrame()
+                if safeCFrame then
+                    char:PivotTo(safeCFrame)
+                    task.wait(0.5)
+                end
+            end
         end
     end
 end)
 
 --------------------------------------------------------------------------------
--- ANIMASI MINIMIZE / EXPAND TOGGLE
+-- ANIMASI TOGGLE
 --------------------------------------------------------------------------------
 local isCollapsed = false
 local tweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
@@ -290,7 +298,7 @@ ToggleBtn.MouseButton1Click:Connect(function()
 end)
 
 --------------------------------------------------------------------------------
--- EVENT CLICK HANDLERS (AMIEN.HUB)
+-- EVENT HANDLERS
 --------------------------------------------------------------------------------
 AutoHopBtn.MouseButton1Click:Connect(StartAutoHop)
 
