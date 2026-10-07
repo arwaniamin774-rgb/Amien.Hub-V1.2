@@ -557,7 +557,7 @@ ToggleStroke.Thickness = 1
 ToggleStroke.Parent = ToggleBtn
 
 --------------------------------------------------------------------------------
--- LOGO
+-- LOGO A
 --------------------------------------------------------------------------------
 
 local LogoHolder = Instance.new("Frame")
@@ -578,29 +578,31 @@ LogoStroke.Thickness = 1
 LogoStroke.Transparency = 0.35
 LogoStroke.Parent = LogoHolder
 
-local FVertical = Instance.new("Frame")
-FVertical.Size = UDim2.fromOffset(2.5, 9)
-FVertical.Position = UDim2.fromOffset(5.5, 4.5)
-FVertical.BackgroundColor3 = Theme.Accent
-FVertical.BorderSizePixel = 0
-FVertical.Rotation = -6
-FVertical.Parent = LogoHolder
+-- KAKI KIRI A
+local ALeft = Instance.new("Frame")
+ALeft.Size = UDim2.fromOffset(2.5, 10)
+ALeft.Position = UDim2.fromOffset(5.5, 4)
+ALeft.BackgroundColor3 = Theme.Accent
+ALeft.BorderSizePixel = 0
+ALeft.Rotation = 18
+ALeft.Parent = LogoHolder
 
-local FTop = Instance.new("Frame")
-FTop.Size = UDim2.fromOffset(6.5, 2.5)
-FTop.Position = UDim2.fromOffset(7, 4.5)
-FTop.BackgroundColor3 = Theme.Accent
-FTop.BorderSizePixel = 0
-FTop.Rotation = -6
-FTop.Parent = LogoHolder
+-- KAKI KANAN A
+local ARight = Instance.new("Frame")
+ARight.Size = UDim2.fromOffset(2.5, 10)
+ARight.Position = UDim2.fromOffset(10, 4)
+ARight.BackgroundColor3 = Theme.Accent
+ARight.BorderSizePixel = 0
+ARight.Rotation = -18
+ARight.Parent = LogoHolder
 
-local FMiddle = Instance.new("Frame")
-FMiddle.Size = UDim2.fromOffset(5, 2)
-FMiddle.Position = UDim2.fromOffset(6.5, 8)
-FMiddle.BackgroundColor3 = Theme.AccentLight
-FMiddle.BorderSizePixel = 0
-FMiddle.Rotation = -6
-FMiddle.Parent = LogoHolder
+-- GARIS TENGAH A
+local AMiddle = Instance.new("Frame")
+AMiddle.Size = UDim2.fromOffset(6, 2)
+AMiddle.Position = UDim2.fromOffset(6, 9)
+AMiddle.BackgroundColor3 = Theme.AccentLight
+AMiddle.BorderSizePixel = 0
+AMiddle.Parent = LogoHolder
 
 --------------------------------------------------------------------------------
 -- TITLE AMIEN.HUB
